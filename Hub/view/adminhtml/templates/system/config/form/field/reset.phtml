@@ -1,0 +1,86 @@
+<?php /* @var $block \Contactlab\Hub\Block\Adminhtml\System\Config\Form\Field\Reset */ ?>
+<?php echo $block->getButtonHtml() ?>
+    <div id="reset-modal" style="display:none;">
+        <h1><?php echo __('Reset Previous Customers') ?></h1>
+        <?php echo __('Warning! If you reset the export, you must be sure that nodes are empty to not duplicate the order data. Are you sure?') ?>
+    </div>
+    <span class="reset-indicator" id="reset_span">
+    <img class="processing" hidden="hidden" alt="Collecting" style="margin:0 5px" src="<?php echo $block->getViewFileUrl('images/process_spinner.gif') ?>"/>
+    <img class="reseted" hidden="hidden" alt="Collected" style="margin:-3px 5px" src="<?php echo $block->getViewFileUrl('images/rule_component_apply.gif') ?>"/>
+    <span id="reset_message_span"></span>
+</span>
+    <script>
+        require(
+            [
+                'jquery',
+                'Magento_Ui/js/modal/modal'
+            ],
+
+            function(
+                $,
+                modal
+            ) {
+                var options = {
+                    type: 'popup',
+                    responsive: true,
+                    innerScroll: true,
+                    buttons: [{
+                        text: $.mage.__('Close'),
+                        attr: {
+                            'data-action': 'close'
+                        },
+                        'class': '',
+                        click: function () {
+                            this.closeModal();
+                        }
+                    },
+                        {
+                            text: $.mage.__('Continue'),
+                            attr: {
+                                'data-action': 'confirm'
+                            },
+                            'class': 'action-primary',
+                            click: function () {
+
+
+                                var resetSpan = $('#reset_span');
+                                var params = {};
+                                new Ajax.Request('<?php echo $block->getAjaxUrl() ?>', {
+                                    parameters:     params,
+                                    loaderArea:     false,
+                                    asynchronous:   true,
+                                    onCreate: function() {
+                                        resetSpan.find('.reseted').hide();
+                                        resetSpan.find('.processing').show();
+                                        $('#reset_message_span').text('');
+                                    },
+                                    onSuccess: function(response) {
+                                        resetSpan.find('.processing').hide();
+
+                                        var resultText = '';
+                                        if (response.status > 200) {
+                                            resultText = response.statusText;
+                                        } else {
+                                            resultText = 'Success';
+                                            resetSpan.find('.reseted').show();
+                                        }
+                                        $('#reset_message_span').text(resultText);
+                                        $('#contactlab_hub_cron_previous_customers_enabled').val(1);
+                                    }
+                                });
+
+
+                                this.closeModal();
+                            }
+                        }
+                    ]
+                };
+
+                var popup = modal(options, $('#reset-modal'));
+                $("#reset_button").on('click',function(){
+                    $("#reset-modal").modal("openModal");
+                });
+
+            }
+        );
+    </script>

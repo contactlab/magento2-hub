@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="layout_generate_blocks_after">
+        <observer name="contactlab_hub_observer_layout_generate_blocks_after"
+                  instance="Contactlab\Hub\Observer\LayoutGenerateBlocksAfter" />
+    </event>
+    <event name="customer_login">
+        <observer name="contactlab_hub_observer_customer_login"
+                  instance="Contactlab\Hub\Observer\CustomerLogin" />
+    </event>
+    <event name="customer_logout">
+        <observer name="contactlab_hub_observer_customer_logout"
+                  instance="Contactlab\Hub\Observer\CustomerLogout" />
+    </event>
+    <event name="wishlist_product_add_after">
+        <observer name="contactlab_hub_observer_wishlist_product_add_after"
+                  instance="Contactlab\Hub\Observer\WishlistProductAddAfter" />
+    </event>
+    <event name="wishlist_item_delete_before">
+        <observer name="contactlab_hub_observer_wishlist_item_delete_before"
+                  instance="Contactlab\Hub\Observer\WishlistItemDeleteBefore" />
+    </event>
+    <event name="catalog_product_compare_add_product">
+        <observer name="contactlab_hub_observer_catalog_product_compare_add_product"
+                  instance="Contactlab\Hub\Observer\CatalogProductCompareAddProduct" />
+    </event>
+    <event name="catalog_product_compare_remove_product">
+        <observer name="contactlab_hub_observer_catalog_product_compare_remove_product"
+                  instance="Contactlab\Hub\Observer\CatalogProductCompareRemoveProduct" />
+    </event>
+    <event name="controller_action_predispatch_catalog_product_compare_clear">
+        <observer name="contactlab_hub_observer_controller_action_predispatch_catalog_product_compare_clear"
+                  instance="Contactlab\Hub\Observer\ControllerActionPredispatchCatalogProductCompareClear" />
+    </event>
+    <event name="controller_action_predispatch">
+        <observer name="contactlab_hub_observer_controller_action_predispatch"
+                  instance="Contactlab\Hub\Observer\ControllerActionPredispatch" />
+    </event>
+
+</config>

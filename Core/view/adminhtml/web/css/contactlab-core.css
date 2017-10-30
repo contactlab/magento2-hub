@@ -1,0 +1,15 @@
+.admin__menu #menu-contactlab-core-core > a:before  {
+	opacity: 0.65;
+	content: '';
+    font-size: 2.4rem;
+    display: block;
+    position: relative;
+    top: -0.3rem;
+    width: 28px;
+    height: 23px;
+    background: url(../images/contactlab.svg);
+    background-size: 28px 23px;
+    margin: 0 auto;
+}
+
+.admin__menu #menu-contactlab-core-core:hover > a:before {opacity: 1;}

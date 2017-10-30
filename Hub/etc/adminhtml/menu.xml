@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<config  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Contactlab_Hub::hub"
+             title="Hub"
+             translate="title"
+             module="Contactlab_Hub"
+             sortOrder="10"
+             parent="Contactlab_Core::core"
+             resource="Contactlab_Hub::hub" />
+        <add id="Contactlab_Hub::event_log"
+             title="Event Log"
+             module="Contactlab_Hub"
+             sortOrder="20"
+             action="contactlab_hub/hub"
+             parent="Contactlab_Hub::hub"
+             resource="Contactlab_Hub::event_log" />
+        <add id="Contactlab_Hub::hub_configuration"
+             title="Configuration"
+             module="Contactlab_Hub"
+             sortOrder="30"
+             parent="Contactlab_Hub::hub"
+             action="adminhtml/system_config/edit/section/contactlab_hub"
+             resource="Contactlab_Hub::hub_configuration"/>
+    </menu>
+</config>

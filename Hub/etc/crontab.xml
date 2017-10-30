@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="contactlab_hub">
+        <job name="contactlab_hub_event" instance="Contactlab\Hub\Cron\Event" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+        <job name="contactlab_hub_previous_customer" instance="Contactlab\Hub\Cron\PreviousCustomer" method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+        <job name="contactlab_hub_abandoned_cart" instance="Contactlab\Hub\Cron\AbandonedCart" method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+    </group>
+</config>

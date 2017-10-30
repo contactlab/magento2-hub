@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="sales_order_shipment_save_after">
+        <observer name="contactlab_hub_observer_sales_order_shipment_save_after" instance="Contactlab\Hub\Observer\SalesOrderShipmentSaveAfter" />
+    </event>
+    <event name="admin_system_config_changed_section_contactlab_hub">
+        <observer name="contactlab_hub_observer_admin_system_config_changed_section" instance="Contactlab\Hub\Observer\AdminSystemConfigChangedSection" />
+    </event>
+</config>

@@ -1,0 +1,358 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="contactlab_hub" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                 showInStore="1">
+            <class>separator-top</class>
+            <label>Hub</label>
+            <tab>contactlab</tab>
+            <resource>Contactlab_Cutofftime::config</resource>
+            <group id="settings" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Settings</label>
+                <field id="apitoken" translate="label comment" type="text" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>ApiToken</label>
+                </field>
+
+                <field id="apiurl" translate="label comment" type="text" sortOrder="20" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Api base url</label>
+                </field>
+                <field id="apiworkspaceid" translate="label comment" type="text" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Api Workspace ID</label>
+                </field>
+                <field id="apinodeid" translate="label comment" type="text" sortOrder="40" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Api Node ID</label>
+                </field>
+                <field id="useproxy" translate="label comment" type="select" sortOrder="50" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Use Proxy</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="proxy" translate="label comment" type="text" sortOrder="60" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Proxy</label>
+                    <comment>Format URL:PORT</comment>
+                    <depends>
+                        <field id="useproxy">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <group id="behavior" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Behavior</label>
+                <field id="send_anonymous" translate="label comment" type="select" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Send anonymous event</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+
+            <group id="logging" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0"
+                   showInStore="0">
+                <label>Logging</label>
+                <field id="log" translate="label comment" type="select" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Log</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="logfilename" translate="label comment" type="text" sortOrder="60" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>File name</label>
+                    <depends>
+                        <field id="log">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <group id="events" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Events</label>
+                <!--
+                <field id="evtregister" translate="label comment" type="select" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Registered</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                -->
+                <field id="loggedIn" translate="label comment" type="select" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>LoggedIn</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="loggedOut" translate="label comment" type="select" sortOrder="20" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>LoggedOut</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="campaignSubscribed" translate="label comment" type="select" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Newsletter subscribed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="campaignUnsubscribed" translate="label comment" type="select" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Newsletter unsubscribed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="campaignName" translate="label comment" type="text" sortOrder="50" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Newsletter Campaign</label>
+                    <comment>Campaign Name e.g. (Magento_Campaign)</comment>
+                </field>
+                <field id="changedSetting" translate="label comment" type="select" sortOrder="60" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Locale changed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="searched" translate="label comment" type="select" sortOrder="70" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Search</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="viewedProductCategory" translate="label comment" type="select" sortOrder="80"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Category viewed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="viewedProduct" translate="label comment" type="select" sortOrder="90" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Product viewed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="addedProduct" translate="label comment" type="select" sortOrder="100" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Product added to cart</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="removedProduct" translate="label comment" type="select" sortOrder="110" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Product removed from cart</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="completedOrder" translate="label comment" type="select" sortOrder="120" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Checkout</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="orderShipped" translate="label comment" type="select" sortOrder="130" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Order Shipped</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="addedWishlist" translate="label comment" type="select" sortOrder="140" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Product added to wishlist</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="removedWishlist" translate="label comment" type="select" sortOrder="150" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Product removed from wishlist</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="addedCompare" translate="label comment" type="select" sortOrder="160" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Product added to compare</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="removedCompare" translate="label comment" type="select" sortOrder="170" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Product removed from compare</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="abandonedCart" translate="label comment" type="select" sortOrder="180" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Abandoned Cart</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+
+            <group id="exchange_rates" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                   showInStore="0">
+                <label>Exchange Rates</label>
+                <field id="base_currency" translate="label comment" type="select" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Base Currency</label>
+                    <frontend_model>Magento\Directory\Block\Adminhtml\Frontend\Currency\Base</frontend_model>
+                    <source_model>Magento\Config\Model\Config\Source\Locale\Currency</source_model>
+                    <comment>
+                        <![CDATA[Base currency is used for all online payment transactions.
+                        The base currency scope is defined by the catalog price scope
+                        ("Catalog" > "Price" > "Catalog Price Scope").]]>
+                    </comment>
+                </field>
+                <field id="website_currency" translate="label comment" type="select" sortOrder="2" showInDefault="0"
+                       showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Website Currency</label>
+                    <source_model>Magento\Config\Model\Config\Source\Locale\Currency</source_model>
+                </field>
+                <field id="exchange_rate" translate="label comment" type="text" sortOrder="3"
+                       showInDefault="0" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Exchange rate</label>
+                    <validate>validate-not-negative-number</validate>
+                </field>
+            </group>
+
+            <group id="abandoned_cart" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Abandoned Carts</label>
+                <field id="send_to_not_subscribed" translate="label comment" type="select" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send Abandoned Cart event from non-subscribed customers</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="contactlab_hub/events/abandonedCart">1</field>
+                    </depends>
+                </field>
+                <field id="min_minutes_from_last_update" translate="label comment" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Minimum number of minutes before sending an Abandoned Cart event</label>
+                    <validate>validate-not-negative-number validate-digits validate-is-min-of-range</validate>
+                    <depends>
+                        <field id="contactlab_hub/events/abandonedCart">1</field>
+                    </depends>
+                </field>
+                <field id="max_minutes_from_last_update" translate="label comment" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum number of minutes before sending an Abandoned Cart event</label>
+                    <validate>validate-not-negative-number validate-digits validate-is-max-of-range</validate>
+                    <depends>
+                        <field id="contactlab_hub/events/abandonedCart">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <group id="customer_extra_properties" translate="label" type="text" sortOrder="10" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Customer Extra Properties</label>
+                <field id="hub_attribute_1" translate="label comment" type="text" sortOrder="10"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Hub attribute 1</label>
+                </field>
+                <field id="mage_attribute_1" translate="label comment" type="select" sortOrder="11" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Magento attribute 1</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\CustomerExtraProperties</source_model>
+                </field>
+                <field id="hub_attribute_2" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Hub attribute 2</label>
+                </field>
+                <field id="mage_attribute_2" translate="label comment" type="select" sortOrder="21" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Magento attribute 2</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\CustomerExtraProperties</source_model>
+                </field>
+                <field id="hub_attribute_3" translate="label comment" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Hub attribute 3</label>
+                </field>
+                <field id="mage_attribute_3" translate="label comment" type="select" sortOrder="31" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Magento attribute 3</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\CustomerExtraProperties</source_model>
+                </field>
+                <field id="hub_attribute_4" translate="label comment" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Hub attribute 4</label>
+                </field>
+                <field id="mage_attribute_4" translate="label comment" type="select" sortOrder="41" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Magento attribute 4</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\CustomerExtraProperties</source_model>
+                </field>
+                <field id="hub_attribute_5" translate="label comment" type="text" sortOrder="50"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Hub attribute 5</label>
+                </field>
+                <field id="mage_attribute_5" translate="label comment" type="select" sortOrder="51" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Magento attribute 5</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\CustomerExtraProperties</source_model>
+                </field>
+                <field id="hub_attribute_6" translate="label comment" type="text" sortOrder="60"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Hub attribute 6</label>
+                </field>
+                <field id="mage_attribute_6" translate="label comment" type="text" sortOrder="61"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Magento attribute 6</label>
+                </field>
+                <field id="hub_attribute_7" translate="label comment" type="text" sortOrder="70"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Hub attribute 7</label>
+                </field>
+                <field id="mage_attribute_7" translate="label comment" type="text" sortOrder="71"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Magento attribute 7</label>
+                </field>
+                <field id="hub_attribute_8" translate="label comment" type="text" sortOrder="80"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Hub attribute 8</label>
+                </field>
+                <field id="mage_attribute_8" translate="label comment" type="text" sortOrder="81"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Magento attribute 8</label>
+                </field>
+                <field id="hub_attribute_9" translate="label comment" type="text" sortOrder="90"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Hub attribute 9</label>
+                </field>
+                <field id="mage_attribute_9" translate="label comment" type="text" sortOrder="91"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Magento attribute 9</label>
+                </field>
+                <field id="hub_attribute_10" translate="label comment" type="text" sortOrder="100"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Hub attribute 10</label>
+                </field>
+                <field id="mage_attribute_10" translate="label comment" type="text" sortOrder="101"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Magento attribute 10</label>
+                </field>
+            </group>
+
+            <group id="cron_events" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Cron Export Events Settings</label>
+                <field id="limit" translate="label comment" type="select" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Limit Events to export</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\Limit</source_model>
+                    <validate>validate-not-negative-number validate-digits validate-is-min-of-range</validate>
+                </field>
+            </group>
+
+            <group id="cron_previous_customers" translate="label" type="text" sortOrder="10" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Cron Previous Customers Settings</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="previous_date" translate="label comment" sortOrder="20" type="text" showInDefault="0"
+                       showInWebsite="0" showInStore="1">
+                    <label>Previous Date</label>
+                    <frontend_model>Contactlab\Hub\Block\Adminhtml\System\Config\Form\Field\DatePicker</frontend_model>
+                </field>
+                <field id="limit" translate="label comment" type="select" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Limit Customers to export</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\Limit</source_model>
+                    <validate>validate-not-negative-number validate-digits validate-is-min-of-range</validate>
+                </field>
+                <field id="reset" translate="label comment" type="button" sortOrder="90" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
+                    <frontend_model>Contactlab\Hub\Block\Adminhtml\System\Config\Form\Field\Reset</frontend_model>
+                    <label>Reset all previous customers</label>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
