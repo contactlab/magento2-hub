@@ -140,6 +140,15 @@
                     <label>Checkout</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="order_status" translate="label comment" type="multiselect" sortOrder="125" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Order Status</label>
+                    <comment><![CDATA[Send Checkout Event When Order is in this status.]]></comment>
+                    <source_model>Contactlab\Hub\Model\Config\Source\OrderStatus</source_model>
+                    <depends>
+                        <field id="contactlab_hub/events/completedOrder">1</field>
+                    </depends>
+                </field>
                 <field id="orderShipped" translate="label comment" type="select" sortOrder="130" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Order Shipped</label>

@@ -28,6 +28,10 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
         {
             $this->_addPreviousCustomerTable($setup);
         }
+        if (version_compare($context->getVersion(), '0.9.8', '<='))
+        {
+            $this->_addHubFlagInOrderTable($setup);
+        }
         $setup->endSetup();
     }
 
@@ -236,5 +240,25 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
 
             $setup->getConnection()->createTable($table);
         }
+    }
+
+    /**
+     *
+     * @param SchemaSetupInterface $setup
+     * @return void
+     */
+    protected function _addHubFlagInOrderTable(SchemaSetupInterface $setup)
+    {
+        $tableName = 'sales_order';
+        $setup->getConnection()->addColumn(
+            $setup->getTable($tableName),
+            'contactlab_hub_exported',
+            [
+                'type'      => \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
+                'nullable'  => false,
+                'default'   => 0,
+                'comment'   => 'Exported to Contactlab Hub'
+            ]
+        );
     }
 }

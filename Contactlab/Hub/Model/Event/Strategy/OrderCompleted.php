@@ -27,7 +27,7 @@ class OrderCompleted extends EventStrategy
         {
             $data['name'] = self::HUB_EVENT_NAME;
             $data['scope'] = self::HUB_EVENT_SCOPE;
-            $data['need_update_identity'] = true;
+            //$data['need_update_identity'] = true;
             $data['identity_email'] = $context['customer_email'];
             $data['store_id'] = $context['store_id'];
             $data['created_at'] = date('Y-m-d H:i:s');

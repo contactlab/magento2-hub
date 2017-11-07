@@ -32,6 +32,7 @@
                 <addedProduct>1</addedProduct>
                 <removedProduct>1</removedProduct>
                 <completedOrder>1</completedOrder>
+                <order_status>processing</order_status>
                 <orderShipped>1</orderShipped>
                 <addedWishlist>1</addedWishlist>
                 <removedWishlist>1</removedWishlist>

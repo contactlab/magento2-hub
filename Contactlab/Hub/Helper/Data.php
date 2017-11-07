@@ -28,6 +28,7 @@ class Data extends AbstractHelper
     const CONTACTLAB_HUB_API_PROXY = 'contactlab_hub/settings/proxy';
     const CONTACTLAB_HUB_CONTEXT = 'ECOMMERCE';
     const CONTACTLAB_HUB_EVENTS = 'contactlab_hub/events';
+    const CONTACTLAB_HUB_EVENTS_ORDER_STATUS = 'contactlab_hub/events/order_status';
     const CONTACTLAB_HUB_CAMPAIGN_NAME = 'contactlab_hub/events/campaignName';
     const CONTACTLAB_HUB_ABANDONED_CART_TO_NOT_SUBSCRIBED = 'contactlab_hub/abandoned_cart/send_to_not_subscribed';
     const CONTACTLAB_HUB_MIN_MINUTES_FROM_LAST_UPDATE = 'contactlab_hub/abandoned_cart/min_minutes_from_last_update';
@@ -269,6 +270,12 @@ class Data extends AbstractHelper
         $this->_saveConfig(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_ENABLED, $enabled, $storeId);
     }
 
+    public function getOrderStatusToBeSent($storeId = null)
+    {
+        return explode(',', $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_EVENTS_ORDER_STATUS,
+            ScopeInterface::SCOPE_STORE, $storeId));
+    }
+
     protected function _saveConfig($path, $value, $scopeId)
     {
         $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
@@ -287,8 +294,6 @@ class Data extends AbstractHelper
             ScopeInterface::SCOPE_STORE, $storeId);
         $websiteCurrency = $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_EXCHANGE_RATES_WEBSITE_CURRENCY,
             ScopeInterface::SCOPE_STORE, $storeId);
-
-        var_dump($baseCurrency, $websiteCurrency);
 
         if($baseCurrency != $websiteCurrency)
         {

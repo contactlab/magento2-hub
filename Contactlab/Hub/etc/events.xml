@@ -3,9 +3,11 @@
     <event name="newsletter_subscriber_save_before">
         <observer name="contactlab_hub_observer_newsletter_subscriber_save_before" instance="Contactlab\Hub\Observer\NewsletterSubscriberSaveBefore" />
     </event>
+    <!--
     <event name="sales_order_place_after">
         <observer name="contactlab_hub_observer_sales_order_place_after" instance="Contactlab\Hub\Observer\SalesOrderPlaceAfter" />
     </event>
+    -->
     <event name="checkout_cart_product_add_after">
         <observer name="contactlab_hub_observer_checkout_cart_product_add_after" instance="Contactlab\Hub\Observer\CheckoutCartProductAddAfter"/>
     </event>
