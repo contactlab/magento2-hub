@@ -117,7 +117,7 @@ class Event implements EventManagementInterface
     public function sendEvent(EventInterface $event)
     {
         $this->_helper->log(__METHOD__);
-        //try
+        try
         {
             $hubCustomerId = null;
             $event->setStatus(EventInterface::EVENT_STATUS_RUNNING);
@@ -131,7 +131,7 @@ class Event implements EventManagementInterface
             $event->setStatus(EventInterface::EVENT_STATUS_EXPORTED);
             $this->_eventRepository->save($event);
         }
-        /*
+
         catch (\RuntimeException $e)
         {
             $event->setStatus(EventInterface::EVENT_STATUS_RETRY);
@@ -144,7 +144,7 @@ class Event implements EventManagementInterface
             $this->_eventRepository->save($event);
             $this->_helper->log($e->getMessage());
         }
-        */
+
         $this->_helper->log('fine export event');
         return $this;
     }
@@ -154,6 +154,26 @@ class Event implements EventManagementInterface
     {
         $this->_searchCriteriaBuilder->addFilter(EventInterface::STATUS,
             array(EventInterface::EVENT_STATUS_UNEXPORTED, EventInterface::EVENT_STATUS_RETRY), 'in');
+        if($pageSize)
+        {
+            $this->_searchCriteriaBuilder->setCurrentPage(1);
+            $this->_searchCriteriaBuilder->setPageSize((int)$pageSize);
+        }
+        return $this->_eventRepository
+            ->getList($this->_searchCriteriaBuilder->create())
+            ->getItems();
+    }
+
+    protected function _getEventsToClean($pageSize = null)
+    {
+
+        $months = $this->_helper->getMonthsToClean();
+        $time = strtotime(date("Y-m-d"));
+        $date = date("Y-m-d", strtotime("-".$months." month", $time));
+        $this->_searchCriteriaBuilder
+            ->addFilter(EventInterface::STATUS,
+                array(EventInterface::EVENT_STATUS_EXPORTED, EventInterface::EVENT_STATUS_ERROR), 'in')
+            ->addFilter(EventInterface::CREATED_AT, $date, 'lt');
         if($pageSize)
         {
             $this->_searchCriteriaBuilder->setCurrentPage(1);
@@ -175,6 +195,19 @@ class Event implements EventManagementInterface
         foreach($this->_getUnexportedEvents($pageSize) as $event)
         {
             $this->sendEvent($event);
+        }
+    }
+
+    /**
+     * Clean Events
+     *
+     * @return $this
+     */
+    public function cleanEvents()
+    {
+        foreach($this->_getEventsToClean() as $event)
+        {
+            $event->delete();
         }
     }
 }

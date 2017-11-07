@@ -370,4 +370,9 @@ class Data extends AbstractHelper
         }
         return $value;
     }
+
+    public function getMonthsToClean()
+    {
+        return 1;
+    }
 }
