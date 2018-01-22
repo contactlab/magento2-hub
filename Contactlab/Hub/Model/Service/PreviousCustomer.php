@@ -15,6 +15,8 @@ use Contactlab\Hub\Api\PreviousCustomerRepositoryInterface;
 use Contactlab\Hub\Api\EventManagementInterface;
 use Contactlab\Hub\Helper\Data as HubHelper;
 use Contactlab\Hub\Model\Event\Strategy\Login;
+use Contactlab\Hub\Model\Event\Strategy\Register;
+use Contactlab\Hub\Model\Event\Strategy\NewsletterSubscribed;
 use Contactlab\Hub\Model\Event\Strategy\OrderCompleted;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -25,6 +27,7 @@ use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Sales\Model\Order;
+use Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory as SubcriberCollectionFactory;
 
 class PreviousCustomer  implements PreviousCustomerManagementInterface
 {
@@ -40,7 +43,12 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
     protected $_customerFactory;
     protected $_orderCollectionFactory;
     protected $_strategyLogin;
+    protected $_strategyRegister;
+    protected $_strategySubscriber;
     protected $_strategyOrderComplete;
+    protected $_subcriberCollectionFactory;
+
+    const CONTACTLAB_HUB_PREVIOUS_CUSTOMER_TABLE = 'contactlab_hub_previous_customer';
 
     public function __construct(
         PreviousCustomerFactory $previousCustomerFactory,
@@ -55,7 +63,10 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
         CustomerCollectionFactory $customerFactory,
         OrderCollectionFactory $orderCollectionFactory,
         Login $strategyLogin,
-        OrderCompleted $strategyOrderComplete
+        Register $strategyRegister,
+        NewsletterSubscribed $strategySubscriber,
+        OrderCompleted $strategyOrderComplete,
+        SubcriberCollectionFactory $subcriberCollectionFactory
     )
     {
         $this->_previousCustomerFactory = $previousCustomerFactory;
@@ -69,8 +80,11 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
         $this->_resource = $resource;
         $this->_customerFactory = $customerFactory;
         $this->_strategyLogin = $strategyLogin;
+        $this->_strategyRegister = $strategyRegister;
+        $this->_strategySubscriber = $strategySubscriber;
         $this->_strategyOrderComplete = $strategyOrderComplete;
         $this->_orderCollectionFactory = $orderCollectionFactory;
+        $this->_subcriberCollectionFactory = $subcriberCollectionFactory;
     }
 
     /**
@@ -87,6 +101,7 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
             {
                 $fromDate = $this->_helper->getPreviousDate($storeId);
                 $this->_getPreviousCustomersFromDate($fromDate, $storeId, $pageSize);
+                $this->_getPreviousSubscribers($storeId, $pageSize);
                 $this->_createEventsFromPreviousCustomers($fromDate, $storeId);
             }
         }
@@ -101,7 +116,7 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
             ->addAttributeToFilter('store_id', array('in' => array(0, $storeId)))
             ->addAttributeToFilter('created_at', array('lteq' => $fromDate));
         $collectionFactory->getSelect()->joinLeft(
-            array('previous_customer' => $this->_resource->getTableName( 'contactlab_hub_previous_customer')
+            array('previous_customer' => $this->_resource->getTableName( self::CONTACTLAB_HUB_PREVIOUS_CUSTOMER_TABLE)
             ), 'previous_customer.email = e.email', array()
         );
         $collectionFactory->getSelect()->where("previous_customer.customer_id IS NULL");
@@ -121,6 +136,33 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
 
     }
 
+
+    protected function _getPreviousSubscribers($storeId, $pageSize = 1)
+    {
+        $collectionFactory = $this->_subcriberCollectionFactory->create();
+        $collectionFactory->useOnlySubscribed()
+            ->addFieldToFilter('store_id', array('in' => array(0, $storeId)))
+            ->addFieldToFilter('main_table.customer_id', array('eq' => 0));
+
+        $collectionFactory->getSelect()->joinLeft(
+            array('previous_customer' => $this->_resource->getTableName( self::CONTACTLAB_HUB_PREVIOUS_CUSTOMER_TABLE)
+            ), 'previous_customer.email = main_table.subscriber_email', array()
+        );
+
+        $collectionFactory->getSelect()->where("previous_customer.customer_id IS NULL");
+        $collectionFactory->getSelect()->limit($pageSize);
+        //echo $collectionFactory->getSelect();
+        foreach ($collectionFactory as $subscriber)
+        {
+            $previousCustomer = $this->_previousCustomerFactory->create();
+            $previousCustomer->setEmail($subscriber->getEmail())
+                ->setStoreId($subscriber->getStoreId())
+                ->setCreatedAt(date('Y-m-d H:i:s'));
+            $this->_previousCustomerRepository->save($previousCustomer);
+        }
+    }
+
+
     protected function _createEventsFromPreviousCustomers($fromDate, $storeId)
     {
         $this->_searchCriteriaBuilder
@@ -131,14 +173,32 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
             ->getItems();
         if(count($previousCustomers) > 0)
         {
-            foreach ($previousCustomers as $previousCustomer) {
-                $this->_strategyLogin->setContext($previousCustomer->getData());
-                $this->_eventService->collectEvent($this->_strategyLogin);
+            foreach ($previousCustomers as $previousCustomer)
+            {
+                if($previousCustomer['customer_id'])
+                {
+                    /*
+                    $this->_strategyLogin->setContext($previousCustomer->getData());
+                    $this->_eventService->collectEvent($this->_strategyLogin);
+                    */
+                    $previousCustomer->setNeedUpdateIdentity(true);
+                    $this->_strategyRegister->setContext($previousCustomer->getData());
+                    $this->_eventService->collectEvent($this->_strategyRegister);
 
-                foreach ($this->_getCustomerOrders($previousCustomer->getCustomerId(), $fromDate) as $order) {
-                    $this->_strategyOrderComplete->setContext($order->getData());
-                    $this->_eventService->collectEvent($this->_strategyOrderComplete);
+                    foreach ($this->_getCustomerOrders($previousCustomer->getCustomerId(), $fromDate) as $order)
+                    {
+                        $this->_strategyOrderComplete->setContext($order->getData());
+                        $this->_eventService->collectEvent($this->_strategyOrderComplete);
+                    }
                 }
+                else
+                {
+                    $data = $previousCustomer->getData();
+                    $data['subscriber_email'] = $data['email'];
+                    $this->_strategySubscriber->setContext($data);
+                    $this->_eventService->collectEvent($this->_strategySubscriber);
+                }
+
                 $previousCustomer->setIsExported(1);
                 $this->_previousCustomerRepository->save($previousCustomer);
             }

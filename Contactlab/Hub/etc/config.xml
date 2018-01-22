@@ -20,6 +20,7 @@
                 <logfilename>contactlab_hub.log</logfilename>
             </logging>
             <events>
+                <formCompiled>1</formCompiled>
                 <loggedIn>1</loggedIn>
                 <loggedOut>1</loggedOut>
                 <campaignSubscribed>1</campaignSubscribed>

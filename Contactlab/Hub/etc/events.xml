@@ -3,6 +3,9 @@
     <event name="newsletter_subscriber_save_before">
         <observer name="contactlab_hub_observer_newsletter_subscriber_save_before" instance="Contactlab\Hub\Observer\NewsletterSubscriberSaveBefore" />
     </event>
+    <event name="customer_register_success">
+        <observer name="contactlab_hub_observer_customer_register_success" instance="Contactlab\Hub\Observer\CustomerRegisterSuccess" />
+    </event>
     <!--
     <event name="sales_order_place_after">
         <observer name="contactlab_hub_observer_sales_order_place_after" instance="Contactlab\Hub\Observer\SalesOrderPlaceAfter" />

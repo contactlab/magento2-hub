@@ -8,6 +8,7 @@ use Magento\Newsletter\Model\SubscriberFactory;
 use Contactlab\Hub\Api\EventManagementInterface;
 use Contactlab\Hub\Model\Event\Strategy\NewsletterSubscribed;
 use Contactlab\Hub\Model\Event\Strategy\NewsletterUnsubscribed;
+use Contactlab\Hub\Helper\Data as HubHelper;
 
 class NewsletterSubscriberSaveBefore  implements ObserverInterface
 {
@@ -15,18 +16,22 @@ class NewsletterSubscriberSaveBefore  implements ObserverInterface
     protected $_subscribeStrategy;
     protected $_unsubscribeStrategy;
     protected $_subscriber;
+    protected $_helper;
 
     public function __construct(
         EventManagementInterface $eventService,
         NewsletterSubscribed $subscribeStrategy,
         NewsletterUnsubscribed $unsubscribeStrategy,
-        SubscriberFactory $subscriberFactory
+        SubscriberFactory $subscriberFactory,
+        HubHelper $helper
+
     )
     {
         $this->_eventService = $eventService;
         $this->_subscribeStrategy = $subscribeStrategy;
         $this->_unsubscribeStrategy = $unsubscribeStrategy;
         $this->_subscriberFactory = $subscriberFactory;
+        $this->_helper = $helper;
     }
 
     public function execute(Observer $observer)
@@ -45,6 +50,9 @@ class NewsletterSubscriberSaveBefore  implements ObserverInterface
             $subscriber->setLastSubscribedAt();
         }
 
+        if($this->_helper->isDiabledSendingSubscriptionEmail($subscriber->getStoreId())) {
+            $subscriber->setImportMode(true);
+        }
 
         if($this->_eventService->getSid())
         {

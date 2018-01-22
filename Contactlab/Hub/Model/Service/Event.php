@@ -53,9 +53,10 @@ class Event implements EventManagementInterface
     /**
      * Collect Event
      *
-     * @param StrategyEventInterface $strategy
+     * @param EventStrategyInterface $strategy
      * @param array $arguments
-     * @return EventInterface $event
+     * @return EventInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function collectEvent(EventStrategyInterface $strategy, $arguments = [])
     {
@@ -113,6 +114,7 @@ class Event implements EventManagementInterface
      *
      * @param EventInterface $event
      * @return $this
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function sendEvent(EventInterface $event)
     {

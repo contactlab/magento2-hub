@@ -42,6 +42,8 @@ class Data extends AbstractHelper
     const CONTACTLAB_HUB_EXCHANGE_RATES_EXCHANGE_RATE = 'contactlab_hub/exchange_rates/exchange_rate';
     const CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_HUB = 'contactlab_hub/customer_extra_properties/hub_attribute';
     const CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_MAGE = 'contactlab_hub/customer_extra_properties/mage_attribute';
+    const CONTACTLAB_HUB_DISABLE_SENDING_SUBSCRIPTION_EMAIL = 'contactlab_hub/behavior/disable_sending_subscription_email';
+    const CONTACTLAB_HUB_DISABLE_SENDING_NEW_CUSTOMER_EMAIL = 'contactlab_hub/behavior/disable_sending_new_customer_email';
 
 
     protected $_scopeConfig;
@@ -331,18 +333,18 @@ class Data extends AbstractHelper
 
     protected function _getCustomerAttributeValue($attributeCode, $customer)
     {
-        $value = null;
+        $value = '';
         if($customer)
         {
             try {
                 $customerAttribute = $this->_eavAttributeRepository->get(\Magento\Customer\Model\Customer::ENTITY, $attributeCode);
                 if ($customerAttribute->getFrontendInput() == 'select' || $customerAttribute->getFrontendInput() == 'multiselect')
                 {
-                    $value = ''.$customerAttribute->getSource()->getOptionText($customer->getData($attributeCode));
+                    $value.= ''.$customerAttribute->getSource()->getOptionText($customer->getData($attributeCode));
                 }
                 else
                 {
-                    $value = $customer->getData($attributeCode);
+                    $value.= $customer->getData($attributeCode);
                 }
             }
             catch(\Magento\Framework\Exception\NoSuchEntityException $e)
@@ -357,9 +359,9 @@ class Data extends AbstractHelper
                     */
                     $addressAttribute = $this->_eavAttributeRepository->get(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS, $attributeCode);
                     if ($addressAttribute->getFrontendInput() == 'select' || $addressAttribute->getFrontendInput() == 'multiselect') {
-                        $value = '' . $addressAttribute->getSource()->getOptionText($address->getData($attributeCode));
+                        $value.= '' . $addressAttribute->getSource()->getOptionText($address->getData($attributeCode));
                     } else {
-                        $value = $address->getData($attributeCode);
+                        $value.= $address->getData($attributeCode);
                     }
                 }
             }
@@ -374,5 +376,17 @@ class Data extends AbstractHelper
     public function getMonthsToClean()
     {
         return 1;
+    }
+
+    public function isDiabledSendingSubscriptionEmail($storeId = null)
+    {
+        return (bool)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_DISABLE_SENDING_SUBSCRIPTION_EMAIL,
+            ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    public function isDiabledSendingNewCustomerEmail($storeId = null)
+    {
+        return (bool)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_DISABLE_SENDING_NEW_CUSTOMER_EMAIL,
+            ScopeInterface::SCOPE_STORE, $storeId);
     }
 }
