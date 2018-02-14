@@ -12,6 +12,8 @@ use Magento\Quote\Model\ResourceModel\Quote\CollectionFactory as QuoteCollection
 use Magento\Eav\Api\AttributeRepositoryInterface;
 //use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Address;
+use Magento\Catalog\Helper\Image as ImageHelper;
+use Magento\Catalog\Api\CategoryRepositoryInterface;
 
 
 class Data extends AbstractHelper
@@ -44,36 +46,42 @@ class Data extends AbstractHelper
     const CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_MAGE = 'contactlab_hub/customer_extra_properties/mage_attribute';
     const CONTACTLAB_HUB_DISABLE_SENDING_SUBSCRIPTION_EMAIL = 'contactlab_hub/behavior/disable_sending_subscription_email';
     const CONTACTLAB_HUB_DISABLE_SENDING_NEW_CUSTOMER_EMAIL = 'contactlab_hub/behavior/disable_sending_new_customer_email';
+    const CONTACTLAB_HUB_JS_TRACKING_ENABLED = 'contactlab_hub/js_tracking/enabled';
+    const CONTACTLAB_HUB_JS_UNTRUSTED_TOKEN = 'contactlab_hub/js_tracking/untrusted_token';
 
 
-    protected $_scopeConfig;
     protected $_resourceConfig;
     protected $_storeManager;
     protected $_quoteCollection;
     protected $_eavAttributeRepository;
     //protected $_addressRepository;
     protected $_address;
+    protected $_imageHelper;
+    protected $_categoryRepository;
 
 
     public function __construct(
         Context $context,
-        ScopeConfigInterface $scopeConfig,
         ConfigInterface  $resourceConfig,
         StoreManagerInterface $storeManager,
         QuoteCollectionFactory $quoteCollection,
         AttributeRepositoryInterface $eavAttributeRepository,
         //AddressRepositoryInterface $addressRepository,
-        Address $address
+        Address $address,
+        ImageHelper $imageHelper,
+        CategoryRepositoryInterface $categoryRepository
 
     ) {
-        $this->_scopeConfig = $scopeConfig;
         $this->_resourceConfig = $resourceConfig;
         $this->_storeManager = $storeManager;
         $this->_quoteCollection = $quoteCollection;
         $this->_eavAttributeRepository = $eavAttributeRepository;
         //$this->_addressRepository = $addressRepository;
         $this->_address = $address;
+        $this->_imageHelper = $imageHelper;
+        $this->_categoryRepository = $categoryRepository;
         parent::__construct($context);
+
     }
 
     public function log($text)
@@ -90,62 +98,62 @@ class Data extends AbstractHelper
     
     protected function _isLogEnabled($storeId = null)
     {
-        return (bool)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_LOG_ENABLED,
+        return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_LOG_ENABLED,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     protected function _getLogFilename($storeId = null)
     {
-        return $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_LOG_FILENAME,
+        return $this->scopeConfig->getValue(self::CONTACTLAB_HUB_LOG_FILENAME,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
 
     public function getApiWorkspaceId($storeId = null)
     {
-        return $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_API_WORKSPACE_ID,
+        return $this->scopeConfig->getValue(self::CONTACTLAB_HUB_API_WORKSPACE_ID,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getApiNodeId($storeId = null)
     {
-        return $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_API_NODE_ID,
+        return $this->scopeConfig->getValue(self::CONTACTLAB_HUB_API_NODE_ID,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getApiToken($storeId = null)
     {
-        return $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_API_TOKEN,
+        return $this->scopeConfig->getValue(self::CONTACTLAB_HUB_API_TOKEN,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getApiUrl($storeId = null)
     {
-        return $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_API_URL,
+        return $this->scopeConfig->getValue(self::CONTACTLAB_HUB_API_URL,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function useProxy($storeId = null)
     {
-        return (bool)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_API_USEPROXY,
+        return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_API_USEPROXY,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getProxy($storeId = null)
     {
-        return $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_API_PROXY,
+        return $this->scopeConfig->getValue(self::CONTACTLAB_HUB_API_PROXY,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getStoreDefaultCountry($storeId = null)
     {
-        return $this->_scopeConfig->getValue(self::MAGENTO_GENERAL_COUNTRY_DEFAULT,
+        return $this->scopeConfig->getValue(self::MAGENTO_GENERAL_COUNTRY_DEFAULT,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getStoreDefaultLocale($storeId = null)
     {
-        return $this->_scopeConfig->getValue(self::MAGENTO_GENERAL_LOCALE_DEFAULT,
+        return $this->scopeConfig->getValue(self::MAGENTO_GENERAL_LOCALE_DEFAULT,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
@@ -156,13 +164,13 @@ class Data extends AbstractHelper
 
     public function isEnableEvent(string $eventName, $storeId = null)
     {
-        return (bool)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_EVENTS.'/'.$eventName,
+        return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_EVENTS.'/'.$eventName,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getCampaignName($storeId = null)
     {
-        return $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_CAMPAIGN_NAME,
+        return $this->scopeConfig->getValue(self::CONTACTLAB_HUB_CAMPAIGN_NAME,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
@@ -217,31 +225,31 @@ class Data extends AbstractHelper
     
     public function sendAbandonedCartToNotSubscribed($storeId = null)
     {
-        return (bool)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_ABANDONED_CART_TO_NOT_SUBSCRIBED,
+        return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_ABANDONED_CART_TO_NOT_SUBSCRIBED,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getMinMinutesBeforeSendAbandonedCart($storeId = null)
     {
-        return (int)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_MIN_MINUTES_FROM_LAST_UPDATE,
+        return (int)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_MIN_MINUTES_FROM_LAST_UPDATE,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getMaxMinutesBeforeSendAbandonedCart($storeId = null)
     {
-        return (int)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_MAX_MINUTES_FROM_LAST_UPDATE,
+        return (int)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_MAX_MINUTES_FROM_LAST_UPDATE,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function isEnabledPreviousCustomer($storeId = null)
     {
-        return (bool)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_ENABLED,
+        return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_ENABLED,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getPreviousDate($storeId = null)
     {
-        $date = $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_PREVIOUS_DATE,
+        $date = $this->scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_PREVIOUS_DATE,
             ScopeInterface::SCOPE_STORE, $storeId);
         if($date)
         {
@@ -252,13 +260,13 @@ class Data extends AbstractHelper
 
     public function getEventPageSize($storeId = null)
     {
-        return (int)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_EVENT_LIMIT,
+        return (int)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_EVENT_LIMIT,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getPreviousCustomerPageSize($storeId = null)
     {
-        return (int)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_LIMIT,
+        return (int)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_LIMIT,
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
@@ -274,7 +282,7 @@ class Data extends AbstractHelper
 
     public function getOrderStatusToBeSent($storeId = null)
     {
-        return explode(',', $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_EVENTS_ORDER_STATUS,
+        return explode(',', $this->scopeConfig->getValue(self::CONTACTLAB_HUB_EVENTS_ORDER_STATUS,
             ScopeInterface::SCOPE_STORE, $storeId));
     }
 
@@ -289,17 +297,46 @@ class Data extends AbstractHelper
         return $this;
     }
 
+    public function getMonthsToClean()
+    {
+        return 1;
+    }
+
+    public function isDiabledSendingSubscriptionEmail($storeId = null)
+    {
+        return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_DISABLE_SENDING_SUBSCRIPTION_EMAIL,
+            ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    public function isDiabledSendingNewCustomerEmail($storeId = null)
+    {
+        return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_DISABLE_SENDING_NEW_CUSTOMER_EMAIL,
+            ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    public function isJsTrackingEnabled($storeId = null)
+    {
+        return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_JS_TRACKING_ENABLED,
+            ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    public function getApiTokenForJavascript($storeId = null)
+    {
+        return $this->scopeConfig->getValue(self::CONTACTLAB_HUB_JS_UNTRUSTED_TOKEN,
+            ScopeInterface::SCOPE_STORE, $storeId) ?: $this->getApiToken($storeId);
+    }
+
     public function getExchangeRate($storeId = null)
     {
         $exchangeRate = 1;
-        $baseCurrency = $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_EXCHANGE_RATES_BASE_CURRENCY,
+        $baseCurrency = $this->scopeConfig->getValue(self::CONTACTLAB_HUB_EXCHANGE_RATES_BASE_CURRENCY,
             ScopeInterface::SCOPE_STORE, $storeId);
-        $websiteCurrency = $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_EXCHANGE_RATES_WEBSITE_CURRENCY,
+        $websiteCurrency = $this->scopeConfig->getValue(self::CONTACTLAB_HUB_EXCHANGE_RATES_WEBSITE_CURRENCY,
             ScopeInterface::SCOPE_STORE, $storeId);
 
         if($baseCurrency != $websiteCurrency)
         {
-            $exchangeRate = (float)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_EXCHANGE_RATES_EXCHANGE_RATE,
+            $exchangeRate = (float)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_EXCHANGE_RATES_EXCHANGE_RATE,
                 ScopeInterface::SCOPE_STORE, $storeId);
             if(!$exchangeRate)
             {
@@ -319,8 +356,8 @@ class Data extends AbstractHelper
         $extraProperties = array();
         for($i=1; $i<6; $i++)
         {
-            $hubAttribute = $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_HUB.'_'.$i);
-            $mageAttribute = $this->_scopeConfig->getValue(self::CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_MAGE.'_'.$i);
+            $hubAttribute = $this->scopeConfig->getValue(self::CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_HUB.'_'.$i);
+            $mageAttribute = $this->scopeConfig->getValue(self::CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_MAGE.'_'.$i);
             if($hubAttribute && $mageAttribute)
             {
                 $value = $this->_getCustomerAttributeValue($mageAttribute, $customer);
@@ -337,8 +374,11 @@ class Data extends AbstractHelper
         if($customer)
         {
             try {
-                $customerAttribute = $this->_eavAttributeRepository->get(\Magento\Customer\Model\Customer::ENTITY, $attributeCode);
-                if ($customerAttribute->getFrontendInput() == 'select' || $customerAttribute->getFrontendInput() == 'multiselect')
+                $customerAttribute = $this->_eavAttributeRepository->get(
+                    \Magento\Customer\Model\Customer::ENTITY, $attributeCode
+                );
+                if ($customerAttribute->getFrontendInput() == 'select' ||
+                    $customerAttribute->getFrontendInput() == 'multiselect')
                 {
                     $value.= ''.$customerAttribute->getSource()->getOptionText($customer->getData($attributeCode));
                 }
@@ -356,11 +396,17 @@ class Data extends AbstractHelper
                     $add = $this->_addressRepository->getById($customerAddressId);
                     var_dump($add->__toArray());
                     die();
-                    */
-                    $addressAttribute = $this->_eavAttributeRepository->get(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS, $attributeCode);
-                    if ($addressAttribute->getFrontendInput() == 'select' || $addressAttribute->getFrontendInput() == 'multiselect') {
+                     */
+                    $addressAttribute = $this->_eavAttributeRepository->get(
+                        \Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS, $attributeCode
+                    );
+                    if ($addressAttribute->getFrontendInput() == 'select' ||
+                        $addressAttribute->getFrontendInput() == 'multiselect')
+                    {
                         $value.= '' . $addressAttribute->getSource()->getOptionText($address->getData($attributeCode));
-                    } else {
+                    }
+                    else
+                    {
                         $value.= $address->getData($attributeCode);
                     }
                 }
@@ -373,20 +419,33 @@ class Data extends AbstractHelper
         return $value;
     }
 
-    public function getMonthsToClean()
+    /**
+     * Get Product As stdClass
+     *
+     * @param $product
+     * @return \stdClass
+     */
+    public function getObjProduct($product)
     {
-        return 1;
-    }
-
-    public function isDiabledSendingSubscriptionEmail($storeId = null)
-    {
-        return (bool)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_DISABLE_SENDING_SUBSCRIPTION_EMAIL,
-            ScopeInterface::SCOPE_STORE, $storeId);
-    }
-
-    public function isDiabledSendingNewCustomerEmail($storeId = null)
-    {
-        return (bool)$this->_scopeConfig->getValue(self::CONTACTLAB_HUB_DISABLE_SENDING_NEW_CUSTOMER_EMAIL,
-            ScopeInterface::SCOPE_STORE, $storeId);
+        $objProduct = new \stdClass();
+        if($product)
+        {
+            $objProduct->id = $product->getEntityId();
+            $objProduct->sku = $product->getSku();
+            $objProduct->name = $product->getName();
+            $objProduct->price = (float)round($product->getFinalPrice(),2);
+            $objProduct->imageUrl = $this->_imageHelper->init($product,'product_page_image_large')
+                ->keepAspectRatio(true)->getUrl();
+            $objProduct->linkUrl = $product->getProductUrl();
+            $objProduct->shortDescription = ''.$product->getShortDescription();
+            $categories = array();
+            foreach($product->getCategoryIds() as $categoryId)
+            {
+                $category = $this->_categoryRepository->get($categoryId);
+                $categories[] = $category->getName();
+            }
+            $objProduct->category = $categories;
+        }
+        return $objProduct;
     }
 }
