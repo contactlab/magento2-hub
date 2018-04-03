@@ -17,7 +17,10 @@ use Contactlab\Hub\Model\EventFactory;
 use Contactlab\Hub\Helper\Data as HubHelper;
 use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Stdlib\Cookie\PublicCookieMetadata;
+use Magento\Framework\App\ObjectManager;
 //use Magento\Framework\Api\DataObjectHelper;
+
 
 class Event implements EventManagementInterface
 {
@@ -31,6 +34,7 @@ class Event implements EventManagementInterface
     protected $_hubService;
     protected $_helper;
     protected $_searchCriteriaBuilder;
+    protected $_customerSession;
 
     protected $_sessionId;
 
@@ -90,7 +94,7 @@ class Event implements EventManagementInterface
         $cookie = json_decode($this->_cookieManager->getCookie(self::COOKIE_SID_NAME));
         if (isset($cookie->customerId))
         {
-            $this->_cookieManager->deleteCookie(self::COOKIE_SID_NAME);
+            $this->deleteTrackingCookie();
             $return = true;
         }
         return $return;
@@ -98,15 +102,48 @@ class Event implements EventManagementInterface
 
     public function getSid()
     {
-        if(!$this->_sessionId) {
-            $cookie = json_decode($this->_cookieManager->getCookie(self::COOKIE_SID_NAME));
-            if ($cookie->sid) {
-                $this->_sessionId = $cookie->sid;
-            } else {
+        if(!$this->_sessionId)
+        {
+            if($cookie = json_decode($this->_cookieManager->getCookie(self::COOKIE_SID_NAME)))
+            {
+                if ($cookie->sid)
+                {
+                    $this->_sessionId = $cookie->sid;
+                }
+            }
+            else if (!$this->_helper->isJsTrackingEnabled())
+            {
+                $this->_sessionId = $this->_createTrackingCookie();
+            }
+            else
+            {
                 $this->_helper->log('Cookie disabled');
             }
         }
         return $this->_sessionId;
+    }
+
+    protected function _createTrackingCookie()
+    {
+        $cookieData = array('sid' => uniqid());
+        $objectManager = ObjectManager::getInstance();
+        $customerSession = $objectManager->get('Magento\Customer\Model\Session');
+        if($customerSession->isLoggedIn())
+        {
+            $cookieData['customerId'] = $customerSession->getCustomer()->getEntityId();
+        }
+        $publicCookieMetadata = new PublicCookieMetadata;
+        $publicCookieMetadata->setDuration(31536000);
+        $publicCookieMetadata->setPath('/');
+        $publicCookieMetadata->setDomain('');
+        $this->_cookieManager->setPublicCookie(self::COOKIE_SID_NAME, json_encode($cookieData),
+            $publicCookieMetadata);
+        return $cookieData['sid'];
+    }
+
+    public function deleteTrackingCookie()
+    {
+        $this->_cookieManager->deleteCookie(self::COOKIE_SID_NAME);
     }
 
     /**
@@ -119,6 +156,7 @@ class Event implements EventManagementInterface
     public function sendEvent(EventInterface $event)
     {
         $this->_helper->log(__METHOD__);
+        $hubEvent = '';
         try
         {
             $hubCustomerId = null;
@@ -127,7 +165,6 @@ class Event implements EventManagementInterface
             $hubCustomerId = $this->_hubService->updateCustomer($event);
             $event->setHubCustomerId($hubCustomerId);
             $hubEvent = $this->_hubService->composeHubEvent($event);
-            $event->setHubEvent(json_encode($hubEvent));
             $this->_hubService->postEvent($hubEvent);
             $event->setExportedAt(date('Y-m-d H:i:s'));
             $event->setStatus(EventInterface::EVENT_STATUS_EXPORTED);
@@ -137,12 +174,14 @@ class Event implements EventManagementInterface
         catch (\RuntimeException $e)
         {
             $event->setStatus(EventInterface::EVENT_STATUS_RETRY);
+            $event->setHubEvent(json_encode($hubEvent));
             $this->_eventRepository->save($event);
             $this->_helper->log($e->getMessage());
         }
         catch (\Exception $e)
         {
             $event->setStatus(EventInterface::EVENT_STATUS_ERROR);
+            $event->setHubEvent(json_encode($hubEvent));
             $this->_eventRepository->save($event);
             $this->_helper->log($e->getMessage());
         }

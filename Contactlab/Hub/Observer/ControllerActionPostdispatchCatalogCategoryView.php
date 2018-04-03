@@ -1,32 +1,39 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: ildelux
+ * Date: 24/01/18
+ * Time: 15:00
+ */
+
 namespace Contactlab\Hub\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Customer\Model\Session;
-use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Framework\Registry;
 use Contactlab\Hub\Api\EventManagementInterface;
-use Contactlab\Hub\Model\Event\Strategy\WishlistAddProduct;
+use Contactlab\Hub\Model\Event\Strategy\CategoryView;
 use Contactlab\Hub\Helper\Data as HubHelper;
 
-class WishlistProductAddAfter implements ObserverInterface
+class ControllerActionPostdispatchCatalogCategoryView implements ObserverInterface
 {
     protected $_customerSession;
-    protected $_productRepository;
+    protected $_registry;
     protected $_eventService;
     protected $_strategy;
     protected $_helper;
 
     public function __construct(
         Session $customerSession,
-        ProductRepositoryInterface $productRepository,
         EventManagementInterface $eventService,
-        WishlistAddProduct $strategy,
+        Registry $registry,
+        CategoryView $strategy,
         HubHelper $helper
     )
     {
         $this->_customerSession = $customerSession;
-        $this->_productRepository = $productRepository;
+        $this->_registry = $registry;
         $this->_eventService = $eventService;
         $this->_strategy = $strategy;
         $this->_helper = $helper;
@@ -34,11 +41,10 @@ class WishlistProductAddAfter implements ObserverInterface
 
     public function execute(Observer $observer)
     {
-        foreach($observer->getItems() as $item)
+        $category =  $this->_registry->registry('current_category');
+        if(!$this->_helper->isJsTrackingEnabled($category->getStoreId()))
         {
-            $product = $this->_productRepository->getById($item->getProductId());
-            $data['product'] = $this->_helper->getObjProduct($product);
-            $data['store_id'] = $product->getStoreId();
+            $data = $category->getData();
             $data['email'] = $this->_customerSession->getCustomer()->getEmail();
             $this->_strategy->setContext($data);
             $this->_eventService->collectEvent($this->_strategy);

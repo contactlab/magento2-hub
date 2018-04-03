@@ -21,7 +21,7 @@ class RemovedProduct extends StrategyProduct
     {
         $hubEvent = parent::build();
         $eventData = json_decode($this->_event->getEventData());
-        $hubEvent->properties->quantity = $eventData->qty;
+        $hubEvent->properties = $eventData;
         return $hubEvent;
     }
 }

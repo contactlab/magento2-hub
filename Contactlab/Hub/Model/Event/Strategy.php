@@ -15,6 +15,14 @@ abstract class Strategy implements EventStrategyInterface
 {
     protected $_context;
 
+
+    public function _construct(
+
+    )
+    {
+
+    }
+
     /**
      * Set Context
      *

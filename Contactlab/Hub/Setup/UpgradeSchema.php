@@ -32,6 +32,10 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
         {
             $this->_addHubFlagInOrderTable($setup);
         }
+        if (version_compare($context->getVersion(), '1.0.1', '<='))
+        {
+            $this->_updateEventDataInHubEventTable($setup);
+        }
         $setup->endSetup();
     }
 
@@ -261,4 +265,21 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
             ]
         );
     }
+
+    protected function _updateEventDataInHubEventTable(SchemaSetupInterface $setup)
+    {
+        $tableName = 'contactlab_hub_event';
+        $setup->getConnection()->changeColumn(
+            $setup->getTable($tableName),
+            'event_data',
+            'event_data',
+            [
+                'type'      => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                'nullable' => true,
+                'collate' => 'utf8_bin',
+                'comment'   => 'Event Data'
+            ]
+        );
+    }
+
 }

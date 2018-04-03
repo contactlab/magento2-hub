@@ -28,20 +28,25 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Contactlab\Hub\Api\EventManagementInterface;
 use Contactlab\Hub\Model\Event\Strategy\Logout;
+use Contactlab\Hub\Helper\Data as Helper;
 
 class CustomerLogout  implements ObserverInterface
 {
     protected $_eventService;
     protected $_strategy;
     protected $_cookieManager;
+    protected $_helper;
+
 
     public function __construct(
         EventManagementInterface $eventService,
-        Logout $strategy
+        Logout $strategy,
+        Helper $helper
     )
     {
         $this->_eventService = $eventService;
         $this->_strategy = $strategy;
+        $this->_helper = $helper;
     }
 
     public function execute(Observer $observer)
@@ -51,6 +56,11 @@ class CustomerLogout  implements ObserverInterface
             $customer = $observer->getCustomer();
             $this->_strategy->setContext($customer->getData());
             $this->_eventService->collectEvent($this->_strategy);
+            // Customer logged out, create a new session id
+            if (!$this->_helper->isJsTrackingEnabled($customer->getStoreId()))
+            {
+                $this->_eventService->deleteTrackingCookie();
+            }
         }
     }
 }

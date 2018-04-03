@@ -6,7 +6,7 @@
     <event name="customer_register_success">
         <observer name="contactlab_hub_observer_customer_register_success" instance="Contactlab\Hub\Observer\CustomerRegisterSuccess" />
     </event>
-    <!--
+    <!-- Removed for order configuration status
     <event name="sales_order_place_after">
         <observer name="contactlab_hub_observer_sales_order_place_after" instance="Contactlab\Hub\Observer\SalesOrderPlaceAfter" />
     </event>

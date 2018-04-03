@@ -8,25 +8,26 @@
 
 namespace Contactlab\Hub\Model\Hub\Strategy;
 
-use Contactlab\Hub\Model\Hub\Strategy\Product as StrategyProduct;
-use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Helper\Image as ImageHelper;
-use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Quote\Model\QuoteFactory;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Contactlab\Hub\Model\Hub\Strategy;
+use Contactlab\Hub\Helper\Data as HubHelper;
 
-class AbandonedCart extends StrategyProduct
+class AbandonedCart extends Strategy
 {
     protected $_quoteFactory;
+    protected $_productRepository;
+    protected $_helper;
 
     public function __construct(
+        QuoteFactory $quoteFactory,
         ProductRepositoryInterface $productRepository,
-        ImageHelper $imageHelper,
-        CategoryRepositoryInterface $categoryRepository,
-        QuoteFactory $quoteFactory
+        HubHelper $helper
     )
     {
-        parent::__construct($productRepository, $imageHelper, $categoryRepository);
         $this->_quoteFactory = $quoteFactory;
+        $this->_productRepository = $productRepository;
+        $this->_helper = $helper;
     }
 
     /**
@@ -57,14 +58,21 @@ class AbandonedCart extends StrategyProduct
         {
             if(!$item->getParentItemId())
             {
-                $product = $this->_productRepository->getById($item->getProductId(), false, $this->_event->getStoreId());
-                $objProduct = $this->_getObjProduct($product);
+                $price = (float)$item->getPriceInclTax();
+                $tax = (float)$item->getTaxAmount();
+                $discount = abs((float)$item->getDiscountAmount());
+                $qty = (int)$item->getQty();
+                $subtotal = $item->getRowTotalInclTax() - $item->getDiscountAmount();
+
+                $product = $this->_productRepository->getById(
+                    $item->getProductId(), false, $this->_event->getStoreId());
+                $objProduct = $this->_helper->getObjProduct($product);
                 $objProduct->type = $eventData->type;
-                $objProduct->price = (float)$item->getPrice();
-                $objProduct->subtotal = (float)$item->getRowTotal();
-                $objProduct->quantity = (int)$item->getQty();
-                $objProduct->discount = (float)$item->getDiscountAmount();
-                $objProduct->tax = (float)$item->getTaxAmount();
+                $objProduct->price = $price;
+                $objProduct->tax = $tax;
+                $objProduct->discount = $discount;
+                $objProduct->quantity = $qty;
+                $objProduct->subtotal = $subtotal;
                 if($quote->getCouponCode())
                 {
                     $objProduct->coupon = $quote->getCouponCode();

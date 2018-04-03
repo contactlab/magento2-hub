@@ -30,10 +30,7 @@ class CartAddProduct extends EventStrategy
             $data['scope'] = self::HUB_EVENT_SCOPE;
             $data['store_id'] = $context['store_id'];
             $date['scope'] = self::HUB_EVENT_SCOPE;
-            $data['event_data'] = array(
-                'product_id' => $context['entity_id'],
-                'qty' => $context['qty']
-            );
+            $data['event_data'] = $context['product'];
         }
         return $data;
     }

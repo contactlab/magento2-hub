@@ -15,6 +15,11 @@
             <behavior>
                 <send_anonymous>0</send_anonymous>
             </behavior>
+            <js_tracking>
+                <enabled>1</enabled>
+                <disclaimer_enabled>DISCLAIMER: JS tracking is enabled</disclaimer_enabled>
+                <disclaimer_disabled>DISCLAIMER: JS tracking is disabled</disclaimer_disabled>
+            </js_tracking>
             <logging>
                 <log>0</log>
                 <logfilename>contactlab_hub.log</logfilename>

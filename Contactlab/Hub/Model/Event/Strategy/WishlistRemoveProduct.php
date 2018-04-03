@@ -30,9 +30,7 @@ class WishlistRemoveProduct extends EventStrategy
             $data['name'] = self::HUB_EVENT_NAME;
             $data['scope'] = self::HUB_EVENT_SCOPE;
             $data['store_id'] = $context['store_id'];
-            $data['event_data'] = array(
-                'product_id' => $context['product_id']
-            );
+            $data['event_data'] = $context['product'];
         }
         return $data;
     }

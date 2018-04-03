@@ -2,13 +2,15 @@
 namespace Contactlab\Hub\Block;
 
 use Contactlab\Hub\Helper\Data as HubHelper;
-use Contactlab\Hub\Model\Hub\Strategy\Product as StrategyProduct;
+use Contactlab\Hub\Model\Event\Strategy\ProductView as EventStrategyProduct;
+use Contactlab\Hub\Model\Hub\Strategy\Product as HubStrategyProduct;
 use Contactlab\Hub\Api\Data\EventInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\Registry;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Helper\Image as ImageHelper;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Customer\Helper\Session\CurrentCustomer;
 use Magento\Catalog\Model\Layer\Resolver as Layer;
 use Magento\Framework\View\Element\Template\Context;
 
@@ -19,34 +21,40 @@ class Js extends Template
 {
     protected $_hubHelper;
     protected $_event;
-    protected $_strategyProduct;
+    protected $_eventStrategyProduct;
+    protected $_hubStrategyProduct;
     protected $_registry;
     protected $_categoryRepository;
     protected $_imageHelper;
     protected $_customerSession;
     protected $_layerResolver;
+    protected $_currentCustomer;
 
 
     public function __construct(
         HubHelper $hubHelper,
         EventInterface $event,
-        StrategyProduct $strategyProduct,
+        EventStrategyProduct $eventStrategyProduct,
+        HubStrategyProduct $hubStrategyProduct,
         Registry $registry,
         CategoryRepositoryInterface $categoryRepository,
         ImageHelper $imageHelper,
         CustomerSession $customerSession,
         Layer $layerResolver,
         Context $context,
+        CurrentCustomer $currentCustomer,
         array $data = []
     ) {
         $this->_hubHelper = $hubHelper;
         $this->_event = $event;
-        $this->_strategyProduct = $strategyProduct;
+        $this->_eventStrategyProduct = $eventStrategyProduct;
+        $this->_hubStrategyProduct = $hubStrategyProduct;
         $this->_registry = $registry;
         $this->_categoryRepository = $categoryRepository;
         $this->_imageHelper = $imageHelper;
         $this->_customerSession = $customerSession;
         $this->_layerResolver = $layerResolver;
+        $this->_currentCustomer = $currentCustomer;
         parent::__construct($context, $data);
     }
 
@@ -135,11 +143,12 @@ class Js extends Template
         {
             $category = $this->getCurrentCategory();
             $hubEvent = new \stdClass();
-            $evt.= $this->_getCoustomerData();
             $hubEvent->type = 'viewedProductCategory';
             $hubEvent->additionalProperties = false;
             $hubEvent->properties = new \stdClass();
             $hubEvent->properties->category = $this->_hubHelper->clearStrings($category->getName());
+
+            $evt.= $this->_getCoustomerData();
             $evt.= "\nch('event',".json_encode($hubEvent).");";
         }
         else
@@ -159,20 +168,10 @@ class Js extends Template
         $evtName = 'viewedProduct';
         if ($this->_hubHelper->isEnableEvent($evtName))
         {
-            $product = $this->getCurrentProduct();
-            $evt.= $this->_getCoustomerData();
-            $event = $this->_event->setStoreId($product->getStoreId())
-                ->setEventData(json_encode(['product_id' => $product->getEntityId()]));
-            $hubEvent = $this->_strategyProduct->setEvent($event)->build();
-            $hubEvent->type = 'viewedProduct';
-            $evt.= "\nch('event',".json_encode($hubEvent).");";
-/*
             $productJs = new \stdClass();
             $product = $this->getCurrentProduct();
             $evt.= $this->_getCoustomerData();
             $productJs->type = 'viewedProduct';
-
-
             $properties = new \stdClass();
             $properties->id = $product->getEntityId();
             $properties->sku = $product->getSku();
@@ -192,7 +191,6 @@ class Js extends Template
             $properties->category = $categories;
             $productJs->properties = $properties;
             $evt.= "\nch('event',".json_encode($productJs).");";
-*/
         }
         else
         {
@@ -214,11 +212,12 @@ class Js extends Template
             $searchQuery = $this->getRequest()->getParam('q');
             $currentLayer = $this->getCurrentLayer();
             $searchResult = ($currentLayer) ? count($currentLayer->getProductCollection()->getAllIds()) : 0;
-            $evt.= $this->_getCoustomerData();
             $hubEvent->type = 'searched';
             $hubEvent->properties = new \stdClass();
             $hubEvent->properties->keyword = $this->_hubHelper->clearStrings($searchQuery);
             $hubEvent->properties->resultCount = $searchResult;
+
+            $evt.= $this->_getCoustomerData();
             $evt.= "\nch('event',".json_encode($hubEvent).");";
         }
         else
@@ -234,6 +233,7 @@ class Js extends Template
      */
     protected function _getCoustomerData()
     {
+        $return = "";
         if($this->_customerSession->isLoggedIn())
         {
             $customer = $this->_customerSession->getCustomer();
@@ -245,7 +245,18 @@ class Js extends Template
             $contacts->email = $customer->getEmail();
             $base->contacts = $contacts;
             $customerInfo->base = $base;
-            return "\nch('customer',".json_encode($customerInfo).");";
+            $return = "\nch('customer',".json_encode($customerInfo).");";
         }
+        return $return;
+    }
+
+    /**
+     * Retrurn if Js Tracking is Enabled
+     *
+     * @return bool
+     */
+    public function isJsTrackingEnabled()
+    {
+        return $this->_hubHelper->isJsTrackingEnabled($this->_hubHelper->getStore()->getStoreId());
     }
 }

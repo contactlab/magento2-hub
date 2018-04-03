@@ -8,25 +8,25 @@
 
 namespace Contactlab\Hub\Model\Hub\Strategy;
 
-use Contactlab\Hub\Model\Hub\Strategy\Product as StrategyProduct;
-use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Helper\Image as ImageHelper;
-use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Sales\Api\Data\ShipmentInterface;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Contactlab\Hub\Model\Hub\Strategy;
+use Contactlab\Hub\Helper\Data as HubHelper;
 
-
-class OrderShipped extends StrategyProduct
+class OrderShipped extends Strategy
 {
     protected $_shipment;
+    protected $_productRepository;
+    protected $_helper;
 
     public function __construct(
+        ShipmentInterface $shipment,
         ProductRepositoryInterface $productRepository,
-        ImageHelper $imageHelper,
-        CategoryRepositoryInterface $categoryRepository,
-        ShipmentInterface $shipment
+        HubHelper $helper
     ){
-        parent::__construct($productRepository, $imageHelper, $categoryRepository);
         $this->_shipment = $shipment;
+        $this->_productRepository= $productRepository;
+        $this->_helper = $helper;
     }
 
     /**
@@ -66,8 +66,9 @@ class OrderShipped extends StrategyProduct
         {
             if (!$item->getParentItemId())
             {
-                $product = $this->_productRepository->getById($item->getProductId(), false, $this->_event->getStoreId());
-                $objProduct = $this->_getObjProduct($product);
+                $product = $this->_productRepository->getById(
+                    $item->getProductId(), false, $this->_event->getStoreId());
+                $objProduct = $this->_helper->getObjProduct($product);
                 $objProduct->type = $eventData->type;
                 $objProduct->quantity = (int)$item->getQty();
                 $objProduct->weight = (float)$item->getWeight();

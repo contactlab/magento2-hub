@@ -128,24 +128,33 @@ class AbandonedCart implements AbandonedCartManagementInterface
             $oldAbandonedCarts = $this->_abandonedCartRepository
                                     ->getList($this->_searchCriteriaBuilder->create())
                                     ->getItems();
-            if(count($oldAbandonedCarts) == 1)
+            if(count($oldAbandonedCarts) > 0)
             {
                 $oldAbandonedCart = $oldAbandonedCarts[0];
                 if(strtotime($cart->getUpdatedAt()) > strtotime($oldAbandonedCart->getUpdatedAt()))
                 {
-                    $newAbandonedCart = $this->_abandonedCartFactory->create();
-                    $newAbandonedCart->setQuoteId($cart->getEntityId());
-                    $newAbandonedCart->setStoreId($cart->getStoreId());
-                    $newAbandonedCart->setEmail($cart->getCustomerEmail());
-                    $newAbandonedCart->setCreatedAt($cart->getCreatedAt());
-                    $newAbandonedCart->setUpdatedAt($cart->getUpdatedAt());
-                    $newAbandonedCart->setAbandonedAt($cart->getUpdatedAt());
-                    $newAbandonedCart->setRemoteIp($cart->getRemoteIp());
-                    $this->_abandonedCartRepository->save($newAbandonedCart);
+                    $this->_createNewAbandonedCart($cart);
                 }
+            }
+            else
+            {
+                $this->_createNewAbandonedCart($cart);
             }
         }
         return $this;
+    }
+
+    protected function _createNewAbandonedCart($cart)
+    {
+        $newAbandonedCart = $this->_abandonedCartFactory->create();
+        $newAbandonedCart->setQuoteId($cart->getEntityId());
+        $newAbandonedCart->setStoreId($cart->getStoreId());
+        $newAbandonedCart->setEmail($cart->getCustomerEmail());
+        $newAbandonedCart->setCreatedAt($cart->getCreatedAt());
+        $newAbandonedCart->setUpdatedAt($cart->getUpdatedAt());
+        $newAbandonedCart->setAbandonedAt($cart->getUpdatedAt());
+        $newAbandonedCart->setRemoteIp($cart->getRemoteIp());
+        $this->_abandonedCartRepository->save($newAbandonedCart);
     }
 
     protected function _createEventsFromAbandonedCarts()

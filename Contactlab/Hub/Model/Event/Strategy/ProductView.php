@@ -1,18 +1,18 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: f.delucia
- * Date: 04/05/17
- * Time: 08:57
+ * User: ildelux
+ * Date: 24/01/18
+ * Time: 12:18
  */
 
 namespace Contactlab\Hub\Model\Event\Strategy;
 
 use Contactlab\Hub\Model\Event\Strategy as EventStrategy;
 
-class WishlistAddProduct extends EventStrategy
+class ProductView extends EventStrategy
 {
-    const HUB_EVENT_NAME = 'addedWishlist';
+    const HUB_EVENT_NAME = 'viewedProduct';
     const HUB_EVENT_SCOPE = 'frontend';
 
     /**
@@ -22,7 +22,6 @@ class WishlistAddProduct extends EventStrategy
      */
     public function build()
     {
-
         $data = array();
         if($context = $this->_context)
         {
