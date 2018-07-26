@@ -43,24 +43,27 @@ class AbandonedCart extends Strategy
         $quote = $this->_quoteFactory->create()->loadByIdWithoutStore($eventData->quote_id);
         $hubEvent->properties->orderId = strval($quote->getEntityId());
         $hubEvent->properties->storeCode = "" . $quote->getStoreId();
-        //$hubEvent->properties->abandonedCartUrl = '';
+        $exchangeRate = (float)$quote->getStoreToOrderRate();
+        if($exchangeRate == 0)
+        {
+            $exchangeRate = $this->_helper->getExchangeRate($quote->getStoreId());
+        }
         $hubEvent->properties->amount = new \stdClass();
-        $hubEvent->properties->amount->total = (float)$quote->getGrandTotal();
-        //$hubEvent->properties->amount->revenue = (float)($quote->getGrandTotal() - $quote->getShippingAmount() - $quote->getShippingTaxAmount());
-        //$hubEvent->properties->amount->shipping = (float)($quote->getShippingAmount() + $quote->getShippingTaxAmount());
-        $hubEvent->properties->amount->tax = (float)$quote->getTaxAmount();
-        //$hubEvent->properties->amount->discount = (float)$quote->getDiscountAmount();
         $hubEvent->properties->amount->local = new \stdClass();
         $hubEvent->properties->amount->local->currency = $quote->getQuoteCurrencyCode();
-        $hubEvent->properties->amount->local->exchangeRate = (float)$quote->getStoreToQuoteRate();
+        $hubEvent->properties->amount->local->exchangeRate = $exchangeRate;
         $arrayProducts = array();
+        $totTax = 0;
+        $totDiscount = 0;
         foreach($quote->getAllItems() as $item)
         {
             if(!$item->getParentItemId())
             {
                 $price = (float)$item->getPriceInclTax();
                 $tax = (float)$item->getTaxAmount();
+                $totTax+= $tax;
                 $discount = abs((float)$item->getDiscountAmount());
+                $totDiscount+= $discount;
                 $qty = (int)$item->getQty();
                 $subtotal = $item->getRowTotalInclTax() - $item->getDiscountAmount();
 
@@ -68,11 +71,11 @@ class AbandonedCart extends Strategy
                     $item->getProductId(), false, $this->_event->getStoreId());
                 $objProduct = $this->_helper->getObjProduct($product);
                 $objProduct->type = $eventData->type;
-                $objProduct->price = $price;
-                $objProduct->tax = $tax;
-                $objProduct->discount = $discount;
+                $objProduct->price = $this->_helper->convertToBaseRate($price, $exchangeRate);
+                $objProduct->tax = $this->_helper->convertToBaseRate($tax, $exchangeRate);
+                $objProduct->discount = $this->_helper->convertToBaseRate($discount, $exchangeRate);
                 $objProduct->quantity = $qty;
-                $objProduct->subtotal = $subtotal;
+                $objProduct->subtotal = $this->_helper->convertToBaseRate($subtotal, $exchangeRate);
                 if($quote->getCouponCode())
                 {
                     $objProduct->coupon = $quote->getCouponCode();
@@ -80,6 +83,9 @@ class AbandonedCart extends Strategy
                 $arrayProducts[] = $objProduct;
             }
         }
+        $hubEvent->properties->amount->total = $this->_helper->convertToBaseRate($quote->getGrandTotal(), $exchangeRate);
+        $hubEvent->properties->amount->tax = $this->_helper->convertToBaseRate($totTax, $exchangeRate);
+        $hubEvent->properties->amount->discount = $this->_helper->convertToBaseRate($totDiscount, $exchangeRate);
         $hubEvent->properties->products = $arrayProducts;
 
         return $hubEvent;

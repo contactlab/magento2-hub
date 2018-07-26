@@ -97,7 +97,7 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
     {
         foreach ($this->_storeInterface->getStores() as $storeId => $store) 
         {
-            if ($this->_helper->isEnabledPreviousCustomer($storeId))
+            //if ($this->_helper->isEnabledPreviousCustomer($storeId))
             {
                 $fromDate = $this->_helper->getPreviousDate($storeId);
                 $this->_getPreviousCustomersFromDate($fromDate, $storeId, $pageSize);
@@ -171,41 +171,50 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
         $previousCustomers = $this->_previousCustomerRepository
             ->getList($this->_searchCriteriaBuilder->create())
             ->getItems();
-        if(count($previousCustomers) > 0)
+        foreach ($previousCustomers as $previousCustomer)
         {
-            foreach ($previousCustomers as $previousCustomer)
+            if($previousCustomer['customer_id'])
             {
-                if($previousCustomer['customer_id'])
-                {
-                    /*
-                    $this->_strategyLogin->setContext($previousCustomer->getData());
-                    $this->_eventService->collectEvent($this->_strategyLogin);
-                    */
-                    $previousCustomer->setNeedUpdateIdentity(true);
-                    $this->_strategyRegister->setContext($previousCustomer->getData());
-                    $this->_eventService->collectEvent($this->_strategyRegister);
+                /*
+                $this->_strategyLogin->setContext($previousCustomer->getData());
+                $this->_eventService->collectEvent($this->_strategyLogin);
+                */
+                $previousCustomer->setNeedUpdateIdentity(true);
+                $this->_strategyRegister->setContext($previousCustomer->getData());
+                $this->_eventService->collectEvent($this->_strategyRegister);
 
+                if($this->_helper->canExportPreviousOrders($storeId))
+                {
                     foreach ($this->_getCustomerOrders($previousCustomer->getCustomerId(), $fromDate) as $order)
                     {
                         $this->_strategyOrderComplete->setContext($order->getData());
                         $this->_eventService->collectEvent($this->_strategyOrderComplete);
                     }
                 }
-                else
-                {
-                    $data = $previousCustomer->getData();
-                    $data['subscriber_email'] = $data['email'];
-                    $this->_strategySubscriber->setContext($data);
-                    $this->_eventService->collectEvent($this->_strategySubscriber);
-                }
-
-                $previousCustomer->setIsExported(1);
-                $this->_previousCustomerRepository->save($previousCustomer);
             }
+            else
+            {
+                $data = $previousCustomer->getData();
+                $data['subscriber_email'] = $data['email'];
+                $this->_strategySubscriber->setContext($data);
+                $this->_eventService->collectEvent($this->_strategySubscriber);
+            }
+
+            $previousCustomer->setIsExported(1);
+            $this->_previousCustomerRepository->save($previousCustomer);
         }
-        else
+
+        $this->_searchCriteriaBuilder
+            ->addFilter(PreviousCustomerInterface::IS_EXPORTED, 0);
+        $totPrevious = $this->_previousCustomerRepository
+            ->getList($this->_searchCriteriaBuilder->create())
+            ->getItems();
+
+
+        if(count($totPrevious) == 0)
         {
-            $this->_helper->setIsEnabledPreviousCustomer(false);
+            $this->_helper->setIsEnabledPreviousCustomer(0);
+            $this->_helper->setExportPreviousOrders(0);
         }
     }
 
@@ -230,7 +239,7 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
         {
             $this->_helper->setPreviousDate(date('Y/m/d'), $storeId);
         }
-        $this->_helper->setIsEnabledPreviousCustomer(true);
+        $this->_helper->setIsEnabledPreviousCustomer(1);
         $this->_setPreviousCustomerAsUnexported();
         return $this;
     }

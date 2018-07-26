@@ -9,6 +9,7 @@ use Magento\Framework\View\Element\Template;
 use Magento\Framework\Registry;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Helper\Image as ImageHelper;
+use Magento\Framework\UrlInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Customer\Helper\Session\CurrentCustomer;
 use Magento\Catalog\Model\Layer\Resolver as Layer;
@@ -29,8 +30,14 @@ class Js extends Template
     protected $_customerSession;
     protected $_layerResolver;
     protected $_currentCustomer;
+    /**
+     * The property is used to define content-scope of block. Can be private or public.
+     * If it isn't defined then application considers it as false.
+     *
+     * @var bool
 
-
+    protected $_isScopePrivate = true;
+     */
     public function __construct(
         HubHelper $hubHelper,
         EventInterface $event,
@@ -58,6 +65,16 @@ class Js extends Template
         parent::__construct($context, $data);
     }
 
+    /**
+     * Get block cache life time
+     *
+     * @return int|bool|null
+
+    public function getCacheLifetime()
+    {
+        return null;
+    }
+     */
     /**
      * Return the current category
      * @return mixed
@@ -170,6 +187,16 @@ class Js extends Template
         {
             $productJs = new \stdClass();
             $product = $this->getCurrentProduct();
+            if($product->getImage())
+            {
+                $productImage = $this->_urlBuilder->getBaseUrl(['_type' => UrlInterface::URL_TYPE_MEDIA])
+                    . 'catalog/product' . $product->getImage();
+            }
+            else
+            {
+                $productImage = $this->_imageHelper->init($product,'product_page_image_large')
+                    ->keepAspectRatio(true)->getUrl();
+            }
             $evt.= $this->_getCoustomerData();
             $productJs->type = 'viewedProduct';
             $properties = new \stdClass();
@@ -177,7 +204,7 @@ class Js extends Template
             $properties->sku = $product->getSku();
             $properties->name = $this->_hubHelper->clearStrings($product->getName());
             $properties->price = round($product->getFinalPrice(),2);
-            $properties->imageUrl = $this->_imageHelper->init($product,'product_page_image_large')->keepAspectRatio(true)->getUrl();
+            $properties->imageUrl = $productImage;
             $properties->linkUrl = $product->getProductUrl();
             if($product->getShortDescription()) {
                 $properties->shortDescription = $this->_hubHelper->clearStrings($product->getShortDescription());

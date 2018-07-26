@@ -2,7 +2,8 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="before.body.end">
-            <block class="Contactlab\Hub\Block\Js" name="contactlab_hub_js" as="contacthub.js" template="contacthub-js.phtml" cacheable="false"/>
+            <!--<referenceContainer name="content">-->
+            <block class="Contactlab\Hub\Block\Js" name="contactlab_hub_js" as="contacthub.js" template="contacthub-js.phtml" ttl="1"/>
         </referenceContainer>
     </body>
 </page>

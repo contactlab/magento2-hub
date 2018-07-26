@@ -34,8 +34,8 @@ class CustomerExtraProperties implements ArrayInterface
     {
         $options[] = array('label' => __('Select an attribute'), 'value' => '');
         $customerAttributes = $this->_customerFactory->create()->getAttributes();
-        $customerAttributesArray = [];
-        $exclude = array('email', 'prefix', 'firstname', 'lastname', 'gender', 'dob');
+        $customerAttributesArray[] = array('label' => __('Customer Id'), 'value' => 'entity_id');;
+        $exclude = array();
         foreach($customerAttributes as $attribute)
         {
             if(!in_array($attribute->getAttributeCode(), $exclude))

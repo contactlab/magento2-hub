@@ -54,14 +54,16 @@ class CompletedOrder extends Strategy
         {
             $exchangeRate = $this->_helper->getExchangeRate($order->getStoreId());
         }
-        $hubEvent->properties->amount->total = $this->_helper->convertToBaseRate($order->getGrandTotal(), $exchangeRate);
-        $hubEvent->properties->amount->revenue = $this->_helper->convertToBaseRate($order->getSubtotal(), $exchangeRate);
-        $hubEvent->properties->amount->shipping = $this->_helper->convertToBaseRate(
-            ($order->getShippingAmount() + $order->getShippingTaxAmount()), $exchangeRate);
-        $hubEvent->properties->amount->tax = $this->_helper->convertToBaseRate(
-            ($order->getTaxAmount() -  $order->getShippingTaxAmount()), $exchangeRate);
-        $hubEvent->properties->amount->discount = $this->_helper->convertToBaseRate(
-            $order->getDiscountAmount(), $exchangeRate);
+        $total = $order->getGrandTotal();
+        $shipping = $order->getShippingAmount() + $order->getShippingTaxAmount();
+        $tax = $order->getTaxAmount() -  $order->getShippingTaxAmount();
+        $discount = abs($order->getDiscountAmount());
+        $revenue = $total - $shipping - $discount;
+        $hubEvent->properties->amount->total = $this->_helper->convertToBaseRate($total, $exchangeRate);
+        $hubEvent->properties->amount->shipping = $this->_helper->convertToBaseRate($shipping, $exchangeRate);
+        $hubEvent->properties->amount->tax = $this->_helper->convertToBaseRate($tax, $exchangeRate);
+        $hubEvent->properties->amount->discount = $this->_helper->convertToBaseRate($discount, $exchangeRate);
+        $hubEvent->properties->amount->revenue = $this->_helper->convertToBaseRate($revenue, $exchangeRate);
         $hubEvent->properties->amount->local = new \stdClass();
         $hubEvent->properties->amount->local->currency = $order->getOrderCurrencyCode();
         $hubEvent->properties->amount->local->exchangeRate = $exchangeRate;

@@ -278,90 +278,16 @@
             <group id="customer_extra_properties" translate="label" type="text" sortOrder="10" showInDefault="1"
                    showInWebsite="1" showInStore="1">
                 <label>Customer Extra Properties</label>
-                <field id="hub_attribute_1" translate="label comment" type="text" sortOrder="10"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Hub attribute 1</label>
-                </field>
-                <field id="mage_attribute_1" translate="label comment" type="select" sortOrder="11" showInDefault="1"
+                <field id="external_id" translate="label comment" type="select" sortOrder="10" showInDefault="1"
                        showInWebsite="1" showInStore="1">
-                    <label>Magento attribute 1</label>
+                    <label>External Id</label>
                     <source_model>Contactlab\Hub\Model\Config\Source\CustomerExtraProperties</source_model>
                 </field>
-                <field id="hub_attribute_2" translate="label comment" type="text" sortOrder="20"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Hub attribute 2</label>
-                </field>
-                <field id="mage_attribute_2" translate="label comment" type="select" sortOrder="21" showInDefault="1"
+                <field id="attribute_map" translate="label comment" sortOrder="20" showInDefault="1"
                        showInWebsite="1" showInStore="1">
-                    <label>Magento attribute 2</label>
-                    <source_model>Contactlab\Hub\Model\Config\Source\CustomerExtraProperties</source_model>
-                </field>
-                <field id="hub_attribute_3" translate="label comment" type="text" sortOrder="30"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Hub attribute 3</label>
-                </field>
-                <field id="mage_attribute_3" translate="label comment" type="select" sortOrder="31" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Magento attribute 3</label>
-                    <source_model>Contactlab\Hub\Model\Config\Source\CustomerExtraProperties</source_model>
-                </field>
-                <field id="hub_attribute_4" translate="label comment" type="text" sortOrder="40"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Hub attribute 4</label>
-                </field>
-                <field id="mage_attribute_4" translate="label comment" type="select" sortOrder="41" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Magento attribute 4</label>
-                    <source_model>Contactlab\Hub\Model\Config\Source\CustomerExtraProperties</source_model>
-                </field>
-                <field id="hub_attribute_5" translate="label comment" type="text" sortOrder="50"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Hub attribute 5</label>
-                </field>
-                <field id="mage_attribute_5" translate="label comment" type="select" sortOrder="51" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Magento attribute 5</label>
-                    <source_model>Contactlab\Hub\Model\Config\Source\CustomerExtraProperties</source_model>
-                </field>
-                <field id="hub_attribute_6" translate="label comment" type="text" sortOrder="60"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Hub attribute 6</label>
-                </field>
-                <field id="mage_attribute_6" translate="label comment" type="text" sortOrder="61"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Magento attribute 6</label>
-                </field>
-                <field id="hub_attribute_7" translate="label comment" type="text" sortOrder="70"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Hub attribute 7</label>
-                </field>
-                <field id="mage_attribute_7" translate="label comment" type="text" sortOrder="71"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Magento attribute 7</label>
-                </field>
-                <field id="hub_attribute_8" translate="label comment" type="text" sortOrder="80"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Hub attribute 8</label>
-                </field>
-                <field id="mage_attribute_8" translate="label comment" type="text" sortOrder="81"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Magento attribute 8</label>
-                </field>
-                <field id="hub_attribute_9" translate="label comment" type="text" sortOrder="90"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Hub attribute 9</label>
-                </field>
-                <field id="mage_attribute_9" translate="label comment" type="text" sortOrder="91"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Magento attribute 9</label>
-                </field>
-                <field id="hub_attribute_10" translate="label comment" type="text" sortOrder="100"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Hub attribute 10</label>
-                </field>
-                <field id="mage_attribute_10" translate="label comment" type="text" sortOrder="101"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Magento attribute 10</label>
+                    <label>CustomerAttribute</label>
+                    <frontend_model>Contactlab\Hub\Block\Adminhtml\System\Config\Form\Map\Customer</frontend_model>
+                    <backend_model>Contactlab\Hub\Model\Adminhtml\System\Config\Backend\Map\Customer</backend_model>
                 </field>
             </group>
 
@@ -382,6 +308,11 @@
                 <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="export_orders" translate="label comment" type="select" sortOrder="15" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Export Previous Orders</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="previous_date" translate="label comment" sortOrder="20" type="text" showInDefault="0"

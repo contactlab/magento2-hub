@@ -13,7 +13,9 @@ use Magento\Eav\Api\AttributeRepositoryInterface;
 //use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Address;
 use Magento\Catalog\Helper\Image as ImageHelper;
+use Magento\Framework\UrlInterface;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Framework\Serialize\Serializer\Json;
 
 
 class Data extends AbstractHelper
@@ -37,13 +39,14 @@ class Data extends AbstractHelper
     const CONTACTLAB_HUB_MAX_MINUTES_FROM_LAST_UPDATE = 'contactlab_hub/abandoned_cart/max_minutes_from_last_update';
     const CONTACTLAB_HUB_CRON_EVENT_LIMIT = 'contactlab_hub/cron_events/limit';
     const CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_ENABLED = 'contactlab_hub/cron_previous_customers/enabled';
+    const CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_EXPORT_ORDERS = 'contactlab_hub/cron_previous_customers/export_orders';
     const CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_PREVIOUS_DATE = 'contactlab_hub/cron_previous_customers/previous_date';
     const CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_LIMIT = 'contactlab_hub/cron_previous_customers/limit';
     const CONTACTLAB_HUB_EXCHANGE_RATES_BASE_CURRENCY = 'contactlab_hub/exchange_rates/base_currency';
     const CONTACTLAB_HUB_EXCHANGE_RATES_WEBSITE_CURRENCY = 'contactlab_hub/exchange_rates/website_currency';
     const CONTACTLAB_HUB_EXCHANGE_RATES_EXCHANGE_RATE = 'contactlab_hub/exchange_rates/exchange_rate';
-    const CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_HUB = 'contactlab_hub/customer_extra_properties/hub_attribute';
-    const CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_MAGE = 'contactlab_hub/customer_extra_properties/mage_attribute';
+    const CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_EXTERNAL_ID = 'contactlab_hub/customer_extra_properties/external_id';
+    const CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_ATTRIBUTE_MAP = 'contactlab_hub/customer_extra_properties/attribute_map';
     const CONTACTLAB_HUB_DISABLE_SENDING_SUBSCRIPTION_EMAIL = 'contactlab_hub/behavior/disable_sending_subscription_email';
     const CONTACTLAB_HUB_DISABLE_SENDING_NEW_CUSTOMER_EMAIL = 'contactlab_hub/behavior/disable_sending_new_customer_email';
     const CONTACTLAB_HUB_JS_TRACKING_ENABLED = 'contactlab_hub/js_tracking/enabled';
@@ -57,7 +60,9 @@ class Data extends AbstractHelper
     //protected $_addressRepository;
     protected $_address;
     protected $_imageHelper;
+    protected $_urlBuilder;
     protected $_categoryRepository;
+    protected $_serializer;
 
 
     public function __construct(
@@ -69,7 +74,9 @@ class Data extends AbstractHelper
         //AddressRepositoryInterface $addressRepository,
         Address $address,
         ImageHelper $imageHelper,
-        CategoryRepositoryInterface $categoryRepository
+        UrlInterface $urlBuilder,
+        CategoryRepositoryInterface $categoryRepository,
+        Json $serializer = null
 
     ) {
         $this->_resourceConfig = $resourceConfig;
@@ -79,7 +86,10 @@ class Data extends AbstractHelper
         //$this->_addressRepository = $addressRepository;
         $this->_address = $address;
         $this->_imageHelper = $imageHelper;
+        $this->_urlBuilder = $urlBuilder;
         $this->_categoryRepository = $categoryRepository;
+        $this->_serializer = $serializer ?: \Magento\Framework\App\ObjectManager::getInstance()
+            ->get(Json::class);
         parent::__construct($context);
 
     }
@@ -247,6 +257,12 @@ class Data extends AbstractHelper
             ScopeInterface::SCOPE_STORE, $storeId);
     }
 
+    public function canExportPreviousOrders($storeId = null)
+    {
+        return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_EXPORT_ORDERS,
+            ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
     public function getPreviousDate($storeId = null)
     {
         $date = $this->scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_PREVIOUS_DATE,
@@ -268,6 +284,11 @@ class Data extends AbstractHelper
     {
         return (int)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_LIMIT,
             ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    public function setExportPreviousOrders($enabled = false, $storeId = Store::DEFAULT_STORE_ID)
+    {
+        $this->_saveConfig(self::CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_EXPORT_ORDERS, $enabled, $storeId);
     }
 
     public function setPreviousDate($date, $storeId = Store::DEFAULT_STORE_ID)
@@ -351,17 +372,33 @@ class Data extends AbstractHelper
         return round(((float)$price / $exchangeRate) ,2);
     }
 
-    public function getCustomerExtraProperties($customer)
+    public function getExternalId($customer)
+    {
+        $externalId = $this->scopeConfig->getValue(
+            self::CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_EXTERNAL_ID,
+            ScopeInterface::SCOPE_STORE,
+            $customer->getStoreId()
+        );
+        return $this->_getCustomerAttributeValue($externalId, $customer);
+    }
+
+    public function getCustomerExtraProperties($customer, $type = 'extended')
     {
         $extraProperties = array();
-        for($i=1; $i<6; $i++)
+        $attributesMap = $this->_serializer->unserialize($this->scopeConfig->getValue(
+            self::CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_ATTRIBUTE_MAP,
+            ScopeInterface::SCOPE_STORE,
+            $customer->getStoreId()
+        ));
+        foreach ($attributesMap as $map)
         {
-            $hubAttribute = $this->scopeConfig->getValue(self::CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_HUB.'_'.$i);
-            $mageAttribute = $this->scopeConfig->getValue(self::CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_MAGE.'_'.$i);
-            if($hubAttribute && $mageAttribute)
+            if($type == $map['hub_type'])
             {
-                $value = $this->_getCustomerAttributeValue($mageAttribute, $customer);
-                $extraProperties[$hubAttribute] = $value;
+                $value = $this->_getCustomerAttributeValue($map['magento_attribute'], $customer);
+                if($value)
+                {
+                    $extraProperties[$map['hub_attribute']] = $value;
+                }
             }
         }
         return $extraProperties;
@@ -370,51 +407,68 @@ class Data extends AbstractHelper
 
     protected function _getCustomerAttributeValue($attributeCode, $customer)
     {
-        $value = '';
-        if($customer)
+        $value = null;
+        if($attributeCode && $customer)
         {
-            try {
-                $customerAttribute = $this->_eavAttributeRepository->get(
-                    \Magento\Customer\Model\Customer::ENTITY, $attributeCode
-                );
-                if ($customerAttribute->getFrontendInput() == 'select' ||
-                    $customerAttribute->getFrontendInput() == 'multiselect')
-                {
-                    $value.= ''.$customerAttribute->getSource()->getOptionText($customer->getData($attributeCode));
-                }
-                else
-                {
-                    $value.= $customer->getData($attributeCode);
-                }
-            }
-            catch(\Magento\Framework\Exception\NoSuchEntityException $e)
+            $value = '';
+            if($attributeCode == 'entity_id')
             {
-                $customerAddressId = $customer->getDefaultBilling();
-                if ($customerAddressId) {
-                    $address = $this->_address->load($customerAddressId);
-                    /** USE REPOSITORY IS BETTER BUT WE HAVEN'T ALL ATTRIBUTES
-                    $add = $this->_addressRepository->getById($customerAddressId);
-                    var_dump($add->__toArray());
-                    die();
-                     */
-                    $addressAttribute = $this->_eavAttributeRepository->get(
-                        \Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS, $attributeCode
+                $value = $customer->getEntityId();
+            }
+            else
+            {
+                try {
+                    $customerAttribute = $this->_eavAttributeRepository->get(
+                        \Magento\Customer\Model\Customer::ENTITY, $attributeCode
                     );
-                    if ($addressAttribute->getFrontendInput() == 'select' ||
-                        $addressAttribute->getFrontendInput() == 'multiselect')
+                    if ($customerAttribute->getFrontendInput() == 'select' ||
+                        $customerAttribute->getFrontendInput() == 'multiselect')
                     {
-                        $value.= '' . $addressAttribute->getSource()->getOptionText($address->getData($attributeCode));
+                        $value.= ''.$customerAttribute->getSource()->getOptionText($customer->getData($attributeCode));
+                    }
+                    elseif($customerAttribute->getBackendType() == 'datetime')
+                    {
+                        $value .= date('Y-m-d', strtotime($customer->getData($attributeCode)));
                     }
                     else
                     {
-                        $value.= $address->getData($attributeCode);
+                        $value.= $customer->getData($attributeCode);
                     }
                 }
-            }
-            catch (\Exception $e)
-            {
+                catch(\Magento\Framework\Exception\NoSuchEntityException $e)
+                {
+                    $customerAddressId = $customer->getDefaultBilling();
+                    if ($customerAddressId) {
+                        $address = $this->_address->load($customerAddressId);
+                        /** USE REPOSITORY IS BETTER BUT WE HAVEN'T ALL ATTRIBUTES
+                        $add = $this->_addressRepository->getById($customerAddressId);
+                        var_dump($add->__toArray());
+                        die();
+                         */
+                        $addressAttribute = $this->_eavAttributeRepository->get(
+                            \Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS, $attributeCode
+                        );
+                        if ($addressAttribute->getFrontendInput() == 'select' ||
+                            $addressAttribute->getFrontendInput() == 'multiselect')
+                        {
+                            $value.= '' . $addressAttribute->getSource()->getOptionText($address->getData($attributeCode));
+                        }
+                        elseif($addressAttribute->getBackendType() == 'datetime')
+                        {
+                            $value .= date('Y-m-d', strtotime($addressAttribute->getData($attributeCode)));
+                        }
+                        else
+                        {
+                            $value.= $address->getData($attributeCode);
+                        }
+                    }
+                }
+                catch (\Exception $e)
+                {
 
+                }
             }
+
         }
         return $value;
     }
@@ -430,12 +484,21 @@ class Data extends AbstractHelper
         $objProduct = new \stdClass();
         if($product)
         {
+            if($product->getImage())
+            {
+                $productImage = $this->_urlBuilder->getBaseUrl(['_type' => UrlInterface::URL_TYPE_MEDIA])
+                . 'catalog/product' . $product->getImage();
+            }
+            else
+            {
+                $productImage = $this->_imageHelper->init($product,'product_page_image_large')
+                    ->keepAspectRatio(true)->getUrl();
+            }
             $objProduct->id = $product->getEntityId();
             $objProduct->sku = $product->getSku();
             $objProduct->name = $product->getName();
             $objProduct->price = (float)round($product->getFinalPrice(),2);
-            $objProduct->imageUrl = $this->_imageHelper->init($product,'product_page_image_large')
-                ->keepAspectRatio(true)->getUrl();
+            $objProduct->imageUrl = $productImage;
             $objProduct->linkUrl = $product->getProductUrl();
             $objProduct->shortDescription = ''.$product->getShortDescription();
             $categories = array();

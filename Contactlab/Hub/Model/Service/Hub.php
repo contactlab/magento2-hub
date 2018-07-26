@@ -203,6 +203,7 @@ class Hub implements HubManagementInterface
         	->loadByEmail($event->getIdentityEmail());        
         if ($customer)
         {
+            /*
             if ($customer->getPrefix())
             {
                 $base->title = $customer->getPrefix();
@@ -223,6 +224,7 @@ class Hub implements HubManagementInterface
             {
                 $base->dob = date('Y-m-d', strtotime($customer->getDob()));
             }
+            */
             $customerAddressId = $customer->getDefaultBilling();
             if ($customerAddressId)
             {
@@ -253,12 +255,24 @@ class Hub implements HubManagementInterface
                 }
                 $base->address = $objAddress;
             }
+            $extraBaseProperties = $this->_helper->getCustomerExtraProperties($customer, 'base');
+            $base = (object) array_merge( (array)$base, $extraBaseProperties );
 
-            $extraProperties =  $this->_helper->getCustomerExtraProperties($customer);
-            if(count($extraProperties) > 0)
+            $externalId = $this->_helper->getExternalId($customer);
+            if($externalId)
             {
-                $extended = (object)$extraProperties;
-                $hubCustomer->extended = $extended;
+                $hubCustomer->externalId = $externalId;
+            }
+
+            $extraExtendedProperties = $this->_helper->getCustomerExtraProperties($customer, 'extended');
+            if (count($extraExtendedProperties) > 0)
+            {
+                $hubCustomer->extended = (object) $extraExtendedProperties;
+            }
+
+            $extraConsentsProperties = $this->_helper->getCustomerExtraProperties($customer, 'consents');
+            if (count($extraConsentsProperties) > 0) {
+                $hubCustomer->consents = (object) $extraConsentsProperties;
             }
         }
 
@@ -270,7 +284,8 @@ class Hub implements HubManagementInterface
                 $subscriberObj = new \stdClass();
                 $subscriberObj->id = $this->_helper->getCampaignName($this->_storeId);
                 $subscriberObj->kind = "DIGITAL_MESSAGE";
-                $subscriberObj->subscribed = ($subscriber->getSubscriberStatus() == Subscriber::STATUS_SUBSCRIBED) ? true : false;
+                $subscriberObj->subscribed = ($subscriber->getSubscriberStatus() == Subscriber::STATUS_SUBSCRIBED)
+                    ? true : false;
                 $subscriberObj->subscriberId = $subscriber->getSubscriberId();
                 $subscriberObj->updatedAt = date(DATE_ISO8601, strtotime($event->getCreatedAt()));
                 $subscriberObj->registeredAt = date(DATE_ISO8601, strtotime($subscriber->getCreatedAt()));
@@ -291,7 +306,7 @@ class Hub implements HubManagementInterface
             }
         }
         $hubCustomer->base = $base;
-        
+
         var_dump($hubCustomer);
         
         return $hubCustomer;
