@@ -1,18 +1,18 @@
 {
     "name": "contactlab/hub",
-    "description": "",
+    "description": "Contacthub module for Magento 2",
     "require": {
         "php": "~5.5.0|~5.6.0|~7.0.0",
-        
-        "magento/magento-composer-installer": "*"
+        "contactlab/core": "*"
     },
     "suggest": {
 
     },
     "type": "magento2-module",
-    "version": "0.1.0",
+    "version": "1.2.0",
     "license": [
-
+        "OSL-3.0",
+        "AFL-3.0"
     ],
     "autoload": {
         "files": [
@@ -21,13 +21,5 @@
         "psr-4": {
             "Contactlab\\Hub\\": ""
         }
-    },
-    "extra": {
-        "map": [
-            [
-                "*",
-                "Contactlab/Hub"
-            ]
-        ]
     }
 }
