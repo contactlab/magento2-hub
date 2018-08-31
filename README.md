@@ -2,6 +2,14 @@
 
 # Contacthub Connect for Magento 2.x
 
-### Public preview release
+## 1. How to install
 
-Documentation coming soon...
+### Install via composer (recommend)
+
+Run the following command in Magento 2 root folder:
+
+```
+composer require contactlab/contacthub-connect-magento2
+php bin/magento setup:upgrade
+php bin/magento setup:static-content:deploy
+```
