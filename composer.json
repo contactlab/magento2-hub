@@ -1,8 +1,9 @@
 {
     "name": "contactlab/magento2-hub",
     "description": "Contacthub module for Magento 2",
+    "minimum-stability": "stable",
     "require": {
-        "php": "~7.0.0",
+        "php": "~7.0",
         "contactlab/magento2-core": "*"
     },
     "suggest": {
