@@ -9,7 +9,7 @@
 Run the following command in Magento 2 root folder:
 
 ```
-composer require contactlab/contacthub-connect-magento2
+composer require contactlab/magento2-hub
 php bin/magento setup:upgrade
 php bin/magento setup:static-content:deploy
 ```
