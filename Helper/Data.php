@@ -209,7 +209,6 @@ class Data extends AbstractHelper
             $collectionFactory->addFieldToFilter('customer_id', array('eq' => $customerId));
             $collectionFactory->getSelect()->limit(1);
             $collectionFactory->getSelect()->order('created_at');
-            echo $collectionFactory->getSelect();
             $remoteIp = $collectionFactory->getFirstItem()->getRemoteIp();
         }
         if(!$remoteIp)
