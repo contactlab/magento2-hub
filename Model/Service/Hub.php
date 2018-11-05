@@ -350,13 +350,20 @@ class Hub implements HubManagementInterface
             var_dump($response);
             if ($response->curl_http_code == 409) /** Conflicting with customer id */
             {
-                unset($hubCustomer->nodeId);
-                $hubCustomer->id = $response->data->customer->id;
-                $url = $response->data->customer->href;
-                $response = $this->patchCustomer($hubCustomer, $url);
-                var_dump($response);
+                if($response->data->customer)
+                {
+                    unset($hubCustomer->nodeId);
+                    $hubCustomer->id = $response->data->customer->id;
+                    $url = $response->data->customer->href;
+                    $response = $this->patchCustomer($hubCustomer, $url);
+                    $hubCustomerId = $response->id;
+                }
+                else
+                {
+                    $this->_helper->log('CAN\'T UPDATE CUSTOMER UNTRUSTED SOURCE');
+                }
             }
-            $hubCustomerId = $response->id;
+
             if($event->getSessionId())
             {
                 $session = new \stdClass();
@@ -366,7 +373,6 @@ class Hub implements HubManagementInterface
             }
 
         }
-        var_dump('Customer Hub ID:  ' .$hubCustomerId);
         return $hubCustomerId;
     }
 
