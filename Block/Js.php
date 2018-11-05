@@ -30,6 +30,7 @@ class Js extends Template
     protected $_customerSession;
     protected $_layerResolver;
     protected $_currentCustomer;
+
     /**
      * The property is used to define content-scope of block. Can be private or public.
      * If it isn't defined then application considers it as false.
@@ -97,7 +98,6 @@ class Js extends Template
     {
         return $this->_layerResolver->get();
     }
-
 
 
     /**
@@ -177,7 +177,8 @@ class Js extends Template
 
     /**
      * Return the Product Json Event Data
-     * @return Js|string
+     *
+     * @return string
      */
     public function getProductEvent()
     {
@@ -212,8 +213,12 @@ class Js extends Template
             $categories = array();
             foreach($product->getCategoryIds() as $categoryId)
             {
-                $category = $this->_categoryRepository->get($categoryId);
-                $categories[] = $category->getName();
+                try {
+                    $category = $this->_categoryRepository->get($categoryId);
+                    $categories[] = $category->getName();
+                }
+                catch (\Magento\Framework\Exception\NoSuchEntityException $e)
+                {}
             }
             $properties->category = $categories;
             $productJs->properties = $properties;

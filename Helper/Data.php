@@ -503,8 +503,13 @@ class Data extends AbstractHelper
             $categories = array();
             foreach($product->getCategoryIds() as $categoryId)
             {
-                $category = $this->_categoryRepository->get($categoryId);
-                $categories[] = $category->getName();
+                try
+                {
+                    $category = $this->_categoryRepository->get($categoryId);
+                    $categories[] = $category->getName();
+                }
+                catch (\Magento\Framework\Exception\NoSuchEntityException $e)
+                {}
             }
             $objProduct->category = $categories;
         }
