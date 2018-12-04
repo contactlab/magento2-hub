@@ -57,8 +57,10 @@ class Reset extends HubController
         /** @var \Magento\Framework\Controller\Result\Json $result */
         $result = $this->_jsonFactory->create();
         try {
-            $this->_previousCustomerService->resetPreviousCustomers()
-                ->collectPreviousCustomers();
+            $this->_previousCustomerService
+                ->resetPreviousCustomers()
+                //->collectPreviousCustomers()
+            ;
             $result->setData(['success' => true]);
         } catch (\Exception $e) {
             $result->setData(['error' => $e]);
