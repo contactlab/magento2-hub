@@ -2,7 +2,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="contactlab_hub">
         <job name="contactlab_hub_export_event" instance="Contactlab\Hub\Cron\ExportEvent" method="execute">
-            <schedule>* * * * *</schedule>
+            <config_path>crontab/contactlab_hub/jobs/contactlab_hub_export_event/schedule/cron_expr</config_path>
         </job>
         <job name="contactlab_hub_previous_customer" instance="Contactlab\Hub\Cron\PreviousCustomer" method="execute">
             <schedule>*/5 * * * *</schedule>

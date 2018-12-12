@@ -291,14 +291,46 @@
                 </field>
             </group>
 
-            <group id="cron_events" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
-                   showInStore="1">
-                <label>Cron Export Events Settings</label>
-                <field id="limit" translate="label comment" type="select" sortOrder="30" showInDefault="1"
+            <group id="cron_events" translate="label" type="text" sortOrder="10" showInDefault="1"
+                   showInWebsite="0" showInStore="0">
+                <label>Cron Export Events</label>
+                <field id="limit" translate="label comment" type="select" sortOrder="20" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Limit Events to export</label>
-                    <source_model>Contactlab\Hub\Model\Config\Source\Limit</source_model>
+                    <source_model>Contactlab\Hub\Model\Config\Source\Cron\Limit</source_model>
                     <validate>validate-not-negative-number validate-digits validate-is-min-of-range</validate>
+                </field>
+                <field id="frequency" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Frequency</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\Cron\Frequency</source_model>
+                    <backend_model>Contactlab\Hub\Model\Config\Cron\Events</backend_model>
+                </field>
+                <field id="time" translate="label comment" sortOrder="40" type="time" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Start Time</label>
+                    <depends>
+                        <field id="frequency" separator="|">D|W|M</field>
+                    </depends>
+                </field>
+                <field id="repeat_minutes" translate="label comment" type="select" sortOrder="40" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Repeats</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\Cron\Minutes</source_model>
+                    <depends>
+                        <field id="frequency">I</field>
+                    </depends>
+                </field>
+                <field id="repeat_hours" translate="label comment" type="select" sortOrder="50" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Repeats</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\Cron\Hours</source_model>
+                    <depends>
+                        <field id="frequency">H</field>
+                    </depends>
+                </field>
+                <field id="delete" translate="label comment" type="select" sortOrder="60" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Delete Exported Events Older Then X Months</label>
+                    <source_model>Contactlab\Hub\Model\Config\Source\Cron\Months</source_model>
                 </field>
             </group>
 
@@ -323,7 +355,7 @@
                 <field id="limit" translate="label comment" type="select" sortOrder="30" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Limit Customers to export</label>
-                    <source_model>Contactlab\Hub\Model\Config\Source\Limit</source_model>
+                    <source_model>Contactlab\Hub\Model\Config\Source\Cron\Limit</source_model>
                     <validate>validate-not-negative-number validate-digits validate-is-min-of-range</validate>
                 </field>
                 <field id="reset" translate="label comment" type="button" sortOrder="90" showInDefault="1"

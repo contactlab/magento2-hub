@@ -38,6 +38,7 @@ class Data extends AbstractHelper
     const CONTACTLAB_HUB_MIN_MINUTES_FROM_LAST_UPDATE = 'contactlab_hub/abandoned_cart/min_minutes_from_last_update';
     const CONTACTLAB_HUB_MAX_MINUTES_FROM_LAST_UPDATE = 'contactlab_hub/abandoned_cart/max_minutes_from_last_update';
     const CONTACTLAB_HUB_CRON_EVENT_LIMIT = 'contactlab_hub/cron_events/limit';
+    const CONTACTLAB_HUB_CRON_EVENT_DELETE = 'contactlab_hub/cron_events/delete';
     const CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_ENABLED = 'contactlab_hub/cron_previous_customers/enabled';
     const CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_EXPORT_ORDERS = 'contactlab_hub/cron_previous_customers/export_orders';
     const CONTACTLAB_HUB_CRON_PREVIOUS_CUSTOMERS_PREVIOUS_DATE = 'contactlab_hub/cron_previous_customers/previous_date';
@@ -47,6 +48,7 @@ class Data extends AbstractHelper
     const CONTACTLAB_HUB_EXCHANGE_RATES_EXCHANGE_RATE = 'contactlab_hub/exchange_rates/exchange_rate';
     const CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_EXTERNAL_ID = 'contactlab_hub/customer_extra_properties/external_id';
     const CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_ATTRIBUTE_MAP = 'contactlab_hub/customer_extra_properties/attribute_map';
+    const CONTACTLAB_HUB_CAN_SEND_ANONIMOUS_EVENTS = 'contactlab_hub/behavior/send_anonymous';
     const CONTACTLAB_HUB_DISABLE_SENDING_SUBSCRIPTION_EMAIL = 'contactlab_hub/behavior/disable_sending_subscription_email';
     const CONTACTLAB_HUB_DISABLE_SENDING_NEW_CUSTOMER_EMAIL = 'contactlab_hub/behavior/disable_sending_new_customer_email';
     const CONTACTLAB_HUB_JS_TRACKING_ENABLED = 'contactlab_hub/js_tracking/enabled';
@@ -317,9 +319,17 @@ class Data extends AbstractHelper
         return $this;
     }
 
-    public function getMonthsToClean()
+    public function getMonthsToClean($storeId = null)
     {
-        return 1;
+        return (int)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_CRON_EVENT_DELETE,
+            ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+
+    public function canSendAnonymousEvents($storeId = null)
+    {
+        return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_CAN_SEND_ANONIMOUS_EVENTS,
+            ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function isDiabledSendingSubscriptionEmail($storeId = null)
