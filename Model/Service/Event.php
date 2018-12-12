@@ -19,7 +19,7 @@ use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Stdlib\Cookie\PublicCookieMetadata;
 use Magento\Framework\App\ObjectManager;
-//use Magento\Framework\Api\DataObjectHelper;
+use Magento\Customer\Model\CustomerFactory;
 
 
 class Event implements EventManagementInterface
@@ -34,7 +34,7 @@ class Event implements EventManagementInterface
     protected $_hubService;
     protected $_helper;
     protected $_searchCriteriaBuilder;
-    protected $_customerSession;
+    protected $_customerFactory;
 
     protected $_sessionId;
 
@@ -44,7 +44,8 @@ class Event implements EventManagementInterface
         HubManagementInterface $hubService,
         HubHelper $helper,
         CookieManagerInterface $cookieManager,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        CustomerFactory $customerFactory
     ){
         $this->_eventFactory = $eventFactory;
         $this->_eventRepository = $eventRepository;
@@ -52,6 +53,7 @@ class Event implements EventManagementInterface
         $this->_helper = $helper;
         $this->_cookieManager = $cookieManager;
         $this->_searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->_customerFactory = $customerFactory;
     }
 
     /**
@@ -66,25 +68,40 @@ class Event implements EventManagementInterface
     {
         $data = $strategy->build();
         $event = $this->_eventFactory->create();
-        if(!array_key_exists('created_at', $data))
+        if($this->_helper->isEnableEvent($data['name'], $data['store_id']))
         {
-            $data['created_at'] = date('Y-m-d H:i:s');
+            $websiteId = $this->_helper->getStore($data['store_id'])->getWebsiteId();
+            $customer = $this->_customerFactory->create();
+            $customer->setWebsiteId($websiteId)
+                ->loadByEmail($event->getIdentityEmail());
+            if ($customer->getEntityId() || $this->_helper->canSendAnonymousEvents($data['store_id']))
+            {
+
+                if(!array_key_exists('created_at', $data))
+                {
+                    $data['created_at'] = date('Y-m-d H:i:s');
+                }
+                if(!array_key_exists('env_user_agent', $data))
+                {
+                    $data['env_user_agent'] = $this->_helper->getUserAgent();
+                }
+                if(!array_key_exists('env_remote_ip', $data))
+                {
+                    $data['env_remote_ip'] = $this->_helper->getRemoteIpAddress();
+                }
+                $data['event_data'] = json_encode($data['event_data']);
+                if($data['scope'] == self::HUB_EVENT_SCOPE_FRONTEND)
+                {
+                    $data['session_id'] = $this->getSid();
+                }
+                $event->setData($data);
+                $this->_eventRepository->save($event);
+            }
         }
-        if(!array_key_exists('env_user_agent', $data))
+        else
         {
-            $data['env_user_agent'] = $this->_helper->getUserAgent();
+            $this->_helper->log('Event '. $data['name'] . ' is disabled');
         }
-        if(!array_key_exists('env_remote_ip', $data))
-        {
-            $data['env_remote_ip'] = $this->_helper->getRemoteIpAddress();
-        }
-        $data['event_data'] = json_encode($data['event_data']);
-        if($data['scope'] == self::HUB_EVENT_SCOPE_FRONTEND)
-        {
-            $data['session_id'] = $this->getSid();
-        }
-        $event->setData($data);
-        $this->_eventRepository->save($event);
         return $event;
     }
 

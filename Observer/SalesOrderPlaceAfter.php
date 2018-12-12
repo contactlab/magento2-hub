@@ -30,7 +30,7 @@ class SalesOrderPlaceAfter implements ObserverInterface
 
     public function execute(Observer $observer)
     {
-        $order =  $observer->getOrder();
+        $order = $observer->getOrder();
         $this->_strategy->setContext($order->getData());
         $this->_eventService->collectEvent($this->_strategy);
     }

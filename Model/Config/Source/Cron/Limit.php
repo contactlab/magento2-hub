@@ -5,7 +5,7 @@
  * Date: 27/06/17
  * Time: 10:11
  */
-namespace Contactlab\Hub\Model\Config\Source;
+namespace Contactlab\Hub\Model\Config\Source\Cron;
 
 use Magento\Framework\Option\ArrayInterface;
 
