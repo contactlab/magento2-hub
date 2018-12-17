@@ -224,9 +224,9 @@ class Data extends AbstractHelper
                 $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
                 $remoteIp =  trim($ips[count($ips) - 1]); //real IP address behind proxy IP
             }
-            else
+            elseif(!empty($_SERVER['REMOTE_ADDR']))
             {
-                $remoteIp =  $_SERVER['REMOTE_ADDR']; //no proxy found
+                $remoteIp = $_SERVER['REMOTE_ADDR']; //no proxy found
             }
         }
         return $remoteIp;
@@ -423,6 +423,10 @@ class Data extends AbstractHelper
             if($attributeCode == 'entity_id')
             {
                 $value = $customer->getEntityId();
+            }
+            elseif($attributeCode == 'email')
+            {
+                $value = $customer->getEmail();
             }
             else
             {

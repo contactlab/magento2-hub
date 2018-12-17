@@ -97,7 +97,7 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
     {
         foreach ($this->_storeInterface->getStores() as $storeId => $store) 
         {
-            //if ($this->_helper->isEnabledPreviousCustomer($storeId))
+            if ($this->_helper->isEnabledPreviousCustomer($storeId))
             {
                 $fromDate = $this->_helper->getPreviousDate($storeId);
                 $this->_getPreviousCustomersFromDate($fromDate, $storeId, $pageSize);
@@ -173,14 +173,16 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
             ->getItems();
         foreach ($previousCustomers as $previousCustomer)
         {
+            $data = null;
             if($previousCustomer['customer_id'])
             {
                 /*
                 $this->_strategyLogin->setContext($previousCustomer->getData());
                 $this->_eventService->collectEvent($this->_strategyLogin);
                 */
-                $previousCustomer->setNeedUpdateIdentity(true);
-                $this->_strategyRegister->setContext($previousCustomer->getData());
+                $data = $previousCustomer->getData();
+                $data['need_update_identity'] = true;
+                $this->_strategyRegister->setContext($data);
                 $this->_eventService->collectEvent($this->_strategyRegister);
 
                 if($this->_helper->canExportPreviousOrders($storeId))
@@ -194,8 +196,10 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
             }
             else
             {
+
                 $data = $previousCustomer->getData();
                 $data['subscriber_email'] = $data['email'];
+                $data['need_update_identity'] = true;
                 $this->_strategySubscriber->setContext($data);
                 $this->_eventService->collectEvent($this->_strategySubscriber);
             }

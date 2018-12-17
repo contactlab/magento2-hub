@@ -73,7 +73,7 @@ class Event implements EventManagementInterface
             $websiteId = $this->_helper->getStore($data['store_id'])->getWebsiteId();
             $customer = $this->_customerFactory->create();
             $customer->setWebsiteId($websiteId)
-                ->loadByEmail($event->getIdentityEmail());
+                ->loadByEmail($data['identity_email']);
             if ($customer->getEntityId() || $this->_helper->canSendAnonymousEvents($data['store_id']))
             {
 

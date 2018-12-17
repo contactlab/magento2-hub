@@ -181,6 +181,7 @@ class Hub implements HubManagementInterface
      *
      * @param EventInterface $event
      * @return \stdClass
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function composeHubCustomer(EventInterface $event)
     {
@@ -203,28 +204,6 @@ class Hub implements HubManagementInterface
         	->loadByEmail($event->getIdentityEmail());        
         if ($customer)
         {
-            /*
-            if ($customer->getPrefix())
-            {
-                $base->title = $customer->getPrefix();
-            }
-            if ($customer->getFirstname())
-            {
-                $base->firstName = $customer->getFirstname();
-            }
-            if ($customer->getLastname())
-            {
-                $base->lastName = $customer->getLastname();
-            }
-            if ($customer->getGender())
-            {
-                $base->gender = $customer->getGender() == 1 ? 'Male' : 'Female';
-            }
-            if ($customer->getDob())
-            {
-                $base->dob = date('Y-m-d', strtotime($customer->getDob()));
-            }
-            */
             $customerAddressId = $customer->getDefaultBilling();
             if ($customerAddressId)
             {
@@ -258,11 +237,7 @@ class Hub implements HubManagementInterface
             $extraBaseProperties = $this->_helper->getCustomerExtraProperties($customer, 'base');
             $base = (object) array_merge( (array)$base, $extraBaseProperties );
 
-            $externalId = $this->_helper->getExternalId($customer);
-            if($externalId)
-            {
-                $hubCustomer->externalId = $externalId;
-            }
+            $hubCustomer->externalId = $this->_helper->getExternalId($customer);
 
             $extraExtendedProperties = $this->_helper->getCustomerExtraProperties($customer, 'extended');
             if (count($extraExtendedProperties) > 0)
@@ -302,7 +277,10 @@ class Hub implements HubManagementInterface
                 $subscriptions[] = $subscriberObj;
                 $base->subscriptions = $subscriptions;
 
-                
+                if(!$hubCustomer->externalId)
+                {
+                    $hubCustomer->externalId = $subscriber->getSubscriberEmail();
+                }
             }
         }
         $hubCustomer->base = $base;
