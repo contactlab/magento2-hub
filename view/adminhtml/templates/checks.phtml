@@ -1,0 +1,65 @@
+<div class="dashboard-item">
+    <div class="dashboard-item-title">Checks</div>
+    <div class="dashboard-item-content">
+        <table class="admin__table-primary" id="checks_table">
+            <tbody>
+
+            <?php $php = $this->checkPhpVersion() ?>
+            <tr class="even no-link">
+                <td>PHP Version</td>
+                <td class="last">
+                    <span
+                            class="contactlab-hub-event-status status<?php echo $php['code'] ?>"
+                            title ="<?php echo $php['message'] ?>">
+                    </span>
+                </td>
+            </tr>
+
+            <?php $magento = $this->checkMagentoVersion() ?>
+            <tr class="even no-link">
+                <td>Magento Version</td>
+                <td class="last">
+                    <span
+                            class="contactlab-hub-event-status status<?php echo $magento['code'] ?>"
+                            title ="<?php echo $magento['message'] ?>">
+                    </span>
+                </td>
+            </tr>
+
+            <?php $cron = $this->checkCron(); ?>
+            <tr class="no-link">
+                <td>Cron</td>
+                <td class="last">
+                    <span
+                        class="contactlab-hub-event-status status<?php echo $cron['code'] ?>"
+                        title ="<?php echo $cron['message'] ?>">
+                    </span>
+                </td>
+            </tr>
+
+            <?php $hub = $this->checkModuleVersion() ?>
+            <tr class="even no-link">
+                <td>Contactlab Hub Version <?php echo $this->getModuleVersion(); ?></td>
+                <td class="last">
+                    <span
+                            class="contactlab-hub-event-status status<?php echo $hub['code'] ?>"
+                            title ="<?php echo $hub['message'] ?>">
+                    </span>
+                </td>
+            </tr>
+
+            <?php $api = $this->checkApi(); ?>
+            <tr class="even no-link">
+                <td>API</td>
+                <td class="last">
+                    <span
+                            class="contactlab-hub-event-status status<?php echo $api['code'] ?>"
+                            title ="<?php echo $api['message'] ?>">
+                    </span>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>

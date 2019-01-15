@@ -6,6 +6,7 @@
     <body>
         <referenceContainer name="content">
             <uiComponent name="event_listing"/>
+            <block class="Contactlab\Hub\Block\Adminhtml\Checks" name="contactlab_hub_checks" template="checks.phtml" after="-" />
         </referenceContainer>
     </body>
 </page>

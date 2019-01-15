@@ -81,7 +81,7 @@ class Hub implements HubManagementInterface
 
     protected function _getHub()
     {
-        var_dump(__METHOD__);
+        //var_dump(__METHOD__);
         $this->_helper->log(__METHOD__);
         if(!$this->_hub)
         {
@@ -97,14 +97,14 @@ class Hub implements HubManagementInterface
             $this->_helper->log('API NODE ID: '.$apiNodeId);
             $this->_helper->log('API URL: '.$apiUrl);
             $this->_helper->log('API PROXY: '.$apiProxy);
-
+            /*
             var_dump('STORE ID: '.$this->_storeId);
             var_dump('API TOKEN: '.$apiToken);
             var_dump('API WORKSPACE: '.$apiWorkspace);
             var_dump('API NODE ID: '.$apiNodeId);
             var_dump('API URL: '.$apiUrl);
             var_dump('API PROXY: '.$apiProxy);
-
+            */
             $this->_hub = $this->_hubModel;
             $this->_hub->setApiToken($apiToken)
                 ->setApiWorkspace($apiWorkspace)
@@ -123,7 +123,7 @@ class Hub implements HubManagementInterface
      */
     public function composeHubEvent(EventInterface $event)
     {
-        var_dump(__METHOD__);
+        //var_dump(__METHOD__);
         $this->_helper->log(__METHOD__);
         $hubEvent = $this->_objectManager
             ->create('\Contactlab\Hub\Model\Hub\Strategy\\'. ucfirst($event->getName()))
@@ -185,7 +185,7 @@ class Hub implements HubManagementInterface
      */
     public function composeHubCustomer(EventInterface $event)
     {
-        var_dump(__METHOD__);
+        //var_dump(__METHOD__);
         $this->_helper->log(__METHOD__);
         $hubCustomer = new \stdClass();
         $hubCustomer->nodeId = $this->_helper->getApiNodeId($event->getStoreId());
@@ -277,15 +277,13 @@ class Hub implements HubManagementInterface
                 $subscriptions[] = $subscriberObj;
                 $base->subscriptions = $subscriptions;
 
-                if(!$hubCustomer->externalId)
+                if(!property_exists($hubCustomer, "externalId"))
                 {
                     $hubCustomer->externalId = $subscriber->getSubscriberEmail();
                 }
             }
         }
         $hubCustomer->base = $base;
-
-        var_dump($hubCustomer);
         
         return $hubCustomer;
 
@@ -300,8 +298,8 @@ class Hub implements HubManagementInterface
      */
     public function postEvent(\stdClass $event)
     {
-        var_dump($event);
-        var_dump(__METHOD__);
+        //var_dump($event);
+        //var_dump(__METHOD__);
         $this->_helper->log(__METHOD__);
         $url = $this->_getUrl('events');
         $response = $this->_getHub()->call($url, $event);
@@ -318,14 +316,20 @@ class Hub implements HubManagementInterface
      */
     public function updateCustomer(EventInterface $event)
     {
-        var_dump(__METHOD__);
+        //var_dump(__METHOD__);
         $this->_helper->log(__METHOD__);
         $hubCustomerId = null;
         if($event->getNeedUpdateIdentity())
         {
             $hubCustomer = $this->composeHubCustomer($event);
             $response = $this->postCustomer($hubCustomer);
-            var_dump($response);
+            //var_dump($response);
+
+            if(property_exists($response, "id"))
+            {
+                $hubCustomerId = $response->id;
+            }
+
             if ($response->curl_http_code == 409) /** Conflicting with customer id */
             {
                 if($response->data->customer)
@@ -362,7 +366,7 @@ class Hub implements HubManagementInterface
      */
     public function postCustomer(\stdClass $customer)
     {
-        var_dump(__METHOD__);
+        //var_dump(__METHOD__);
         $this->_helper->log(__METHOD__);
         $url = $this->_getUrl('customers');
         $response = $this->_getHub()->call($url, $customer);
@@ -379,9 +383,29 @@ class Hub implements HubManagementInterface
      */
     public function patchCustomer(\stdClass $customer, string $url)
     {
-        var_dump(__METHOD__);
+        //var_dump(__METHOD__);
         $this->_helper->log(__METHOD__);
         $response = $this->_getHub()->call($url, $customer, \Zend_Http_Client::PATCH);
+        $response = json_decode($response);
+        return $response;
+    }
+
+    /**
+     * Get Customers
+     *
+     * @return mixed
+     */
+    public function getCustomers()
+    {
+        //var_dump(__METHOD__);
+        $this->_helper->log(__METHOD__);
+        $url = $this->_getUrl('customers');
+        $query = [
+            'nodeId' => $this->_helper->getApiNodeId(),
+            'size' => 1
+        ];
+        $url .= '?'.http_build_query($query);
+        $response = $this->_getHub()->call($url, null, \Zend_Http_Client::GET);
         $response = json_decode($response);
         return $response;
     }
@@ -412,10 +436,10 @@ class Hub implements HubManagementInterface
 
     private function _checkError($response)
     {
-        var_dump(__METHOD__);
+        //var_dump(__METHOD__);
         $this->_helper->log(__METHOD__);
         $errorMessage = null;
-        var_dump($response);
+        //var_dump($response);
 
         if($response->curl_http_code == 400 /** Bad Request */)
         {
