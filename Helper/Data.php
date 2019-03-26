@@ -404,7 +404,7 @@ class Data extends AbstractHelper
             if($type == $map['hub_type'])
             {
                 $value = $this->_getCustomerAttributeValue($map['magento_attribute'], $customer);
-                if($value)
+                if(strlen($value) > 0)
                 {
                     $extraProperties[$map['hub_attribute']] = $value;
                 }
