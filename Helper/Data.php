@@ -404,7 +404,7 @@ class Data extends AbstractHelper
             if($type == $map['hub_type'])
             {
                 $value = $this->_getCustomerAttributeValue($map['magento_attribute'], $customer);
-                if(strlen($value) > 0)
+                if(!is_null($value))
                 {
                     $extraProperties[$map['hub_attribute']] = $value;
                 }
@@ -419,7 +419,6 @@ class Data extends AbstractHelper
         $value = null;
         if($attributeCode && $customer)
         {
-            $value = '';
             if($attributeCode == 'entity_id')
             {
                 $value = $customer->getEntityId();
@@ -437,15 +436,15 @@ class Data extends AbstractHelper
                     if ($customerAttribute->getFrontendInput() == 'select' ||
                         $customerAttribute->getFrontendInput() == 'multiselect')
                     {
-                        $value.= ''.$customerAttribute->getSource()->getOptionText($customer->getData($attributeCode));
+                        $value = $customerAttribute->getSource()->getOptionText($customer->getData($attributeCode));
                     }
                     elseif($customerAttribute->getBackendType() == 'datetime')
                     {
-                        $value .= date('Y-m-d', strtotime($customer->getData($attributeCode)));
+                        $value = date('Y-m-d', strtotime($customer->getData($attributeCode)));
                     }
                     else
                     {
-                        $value.= $customer->getData($attributeCode);
+                        $value = $customer->getData($attributeCode);
                     }
                 }
                 catch(\Magento\Framework\Exception\NoSuchEntityException $e)
@@ -464,15 +463,15 @@ class Data extends AbstractHelper
                         if ($addressAttribute->getFrontendInput() == 'select' ||
                             $addressAttribute->getFrontendInput() == 'multiselect')
                         {
-                            $value.= '' . $addressAttribute->getSource()->getOptionText($address->getData($attributeCode));
+                            $value =  $addressAttribute->getSource()->getOptionText($address->getData($attributeCode));
                         }
                         elseif($addressAttribute->getBackendType() == 'datetime')
                         {
-                            $value .= date('Y-m-d', strtotime($addressAttribute->getData($attributeCode)));
+                            $value = date('Y-m-d', strtotime($addressAttribute->getData($attributeCode)));
                         }
                         else
                         {
-                            $value.= $address->getData($attributeCode);
+                            $value = $address->getData($attributeCode);
                         }
                     }
                 }
