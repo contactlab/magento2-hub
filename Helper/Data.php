@@ -15,7 +15,6 @@ use Magento\Customer\Model\Address;
 use Magento\Catalog\Helper\Image as ImageHelper;
 use Magento\Framework\UrlInterface;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
-use Magento\Framework\Serialize\Serializer\Json;
 
 
 class Data extends AbstractHelper
@@ -64,7 +63,6 @@ class Data extends AbstractHelper
     protected $_imageHelper;
     protected $_urlBuilder;
     protected $_categoryRepository;
-    protected $_serializer;
 
 
     public function __construct(
@@ -77,8 +75,7 @@ class Data extends AbstractHelper
         Address $address,
         ImageHelper $imageHelper,
         UrlInterface $urlBuilder,
-        CategoryRepositoryInterface $categoryRepository,
-        Json $serializer = null
+        CategoryRepositoryInterface $categoryRepository
 
     ) {
         $this->_resourceConfig = $resourceConfig;
@@ -90,8 +87,6 @@ class Data extends AbstractHelper
         $this->_imageHelper = $imageHelper;
         $this->_urlBuilder = $urlBuilder;
         $this->_categoryRepository = $categoryRepository;
-        $this->_serializer = $serializer ?: \Magento\Framework\App\ObjectManager::getInstance()
-            ->get(Json::class);
         parent::__construct($context);
 
     }
@@ -107,7 +102,7 @@ class Data extends AbstractHelper
         }
         return $this;
     }
-    
+
     protected function _isLogEnabled($storeId = null)
     {
         return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_LOG_ENABLED,
@@ -233,7 +228,7 @@ class Data extends AbstractHelper
 
 
     }
-    
+
     public function sendAbandonedCartToNotSubscribed($storeId = null)
     {
         return (bool)$this->scopeConfig->getValue(self::CONTACTLAB_HUB_ABANDONED_CART_TO_NOT_SUBSCRIBED,
@@ -394,11 +389,11 @@ class Data extends AbstractHelper
     public function getCustomerExtraProperties($customer, $type = 'extended')
     {
         $extraProperties = array();
-        $attributesMap = $this->_serializer->unserialize($this->scopeConfig->getValue(
+        $attributesMap = json_decode($this->scopeConfig->getValue(
             self::CONTACTLAB_HUB_CUSTOMER_EXTRA_PROPERTIES_ATTRIBUTE_MAP,
             ScopeInterface::SCOPE_STORE,
             $customer->getStoreId()
-        ));
+        ), true);
         foreach ($attributesMap as $map)
         {
             if($type == $map['hub_type'])
@@ -499,7 +494,7 @@ class Data extends AbstractHelper
             if($product->getImage())
             {
                 $productImage = $this->_urlBuilder->getBaseUrl(['_type' => UrlInterface::URL_TYPE_MEDIA])
-                . 'catalog/product' . $product->getImage();
+                    . 'catalog/product' . $product->getImage();
             }
             else
             {

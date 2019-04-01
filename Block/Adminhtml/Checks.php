@@ -24,7 +24,7 @@ class Checks extends Template
     const STATUS_OK = 3;
 
     const PHP_MIN_VERSION = '7.0';
-    const MAGENTO_MIN_VERSION = '2.2.3';
+    const MAGENTO_MIN_VERSION = '2.1.17';
     const HUB_LATEST_VERSION_FILE =  'https://raw.githubusercontent.com/contactlab/magento2-hub/master/etc/module.xml';
 
     protected $_moduleResource;

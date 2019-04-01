@@ -1,27 +1,4 @@
 <?php
-/*
-namespace Contactlab\Hub\Model\Adminhtml\System\Config\Backend\Map;
-
-class Customer extends \Magento\Config\Model\Config\Backend\Serialized
-{
-    const XML_PATH_HUB_FIELD_ATTRIBUTE = 'customer_mapping';
-
-
-    public function beforeSave()
-    {
-
-        $_value = $this->getValue();
-        unset($_value[static::XML_PATH_HUB_FIELD_ATTRIBUTE][-1]);
-        $startOne = array_combine(range(1, count($_value[static::XML_PATH_HUB_FIELD_ATTRIBUTE])),
-            array_values($_value[static::XML_PATH_HUB_FIELD_ATTRIBUTE]));
-        $_value[static::XML_PATH_HUB_FIELD_ATTRIBUTE] = $startOne;
-        $this->setValue($_value);
-
-        parent::beforeSave();
-    }
-}
-*/
-
 
 namespace Contactlab\Hub\Model\Adminhtml\System\Config\Backend\Map;
 
@@ -33,7 +10,6 @@ use Magento\Framework\Math\Random;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
-use Magento\Framework\Serialize\Serializer\Json;
 
 /**
  * Class CountryCreditCard
@@ -46,11 +22,6 @@ class Customer extends Value
     protected $mathRandom;
 
     /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    private $serializer;
-
-    /**
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
@@ -59,7 +30,6 @@ class Customer extends Value
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
      * @param array $data
-     * @param \Magento\Framework\Serialize\Serializer\Json $serializer
      */
     public function __construct(
         Context $context,
@@ -69,12 +39,9 @@ class Customer extends Value
         Random $mathRandom,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
-        array $data = [],
-        Json $serializer = null
+        array $data = []
     ) {
         $this->mathRandom = $mathRandom;
-        $this->serializer = $serializer ?: \Magento\Framework\App\ObjectManager::getInstance()
-            ->get(Json::class);
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
@@ -90,7 +57,7 @@ class Customer extends Value
         {
             unset($value['__empty']);
         }
-        $this->setValue($this->serializer->serialize($value));
+        $this->setValue(json_encode($value));
         return $this;
     }
 
@@ -102,7 +69,7 @@ class Customer extends Value
     public function afterLoad()
     {
         if ($this->getValue()) {
-            $value = $this->serializer->unserialize($this->getValue());
+            $value = json_decode($this->getValue(), true);
             if (is_array($value)) {
                 $this->setValue($value);
             }
