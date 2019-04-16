@@ -34,7 +34,9 @@ class OrderCompleted extends EventStrategy
             if(array_key_exists('updated_at', $context)) {
                 $data['created_at'] = $context['updated_at'];
             }
-            $data['env_remote_ip'] = $context['remote_ip'];
+            if (isset($context['remote_ip'])){
+                $data['env_remote_ip'] = $context['remote_ip'];
+            }
             $eventData = array(
                 'type' => 'sale',
                 'increment_id' => $context['increment_id']
