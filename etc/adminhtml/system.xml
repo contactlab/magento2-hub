@@ -7,7 +7,7 @@
             <class>separator-top</class>
             <label>Hub</label>
             <tab>contactlab</tab>
-            <resource>Contactlab_Cutofftime::config</resource>
+            <resource>Contactlab_Hub::config</resource>
             <group id="settings" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
                    showInStore="1">
                 <label>Settings</label>
