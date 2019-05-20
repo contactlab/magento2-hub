@@ -28,10 +28,11 @@ class Register extends EventStrategy
             $eventData = array();
             $data['name'] = self::HUB_EVENT_NAME;
             $data['scope'] = self::HUB_EVENT_SCOPE;
-            if(array_key_exists('need_update_identity', $context))
+            if(array_key_exists('scope', $context))
             {
-                $data['need_update_identity'] = $context['need_update_identity'];
+                $data['scope'] = $context['scope'];
             }
+            $data['need_update_identity'] = true;
             if(array_key_exists('created_at', $context))
             {
                 $data['created_at'] = $context['created_at'];

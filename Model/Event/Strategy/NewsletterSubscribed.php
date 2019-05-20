@@ -28,6 +28,10 @@ class NewsletterSubscribed extends EventStrategy
             $eventData = array();
             $data['name'] = self::HUB_EVENT_NAME;
             $data['scope'] = self::HUB_EVENT_SCOPE;
+            if(array_key_exists('scope', $context))
+            {
+                $data['scope'] = $context['scope'];
+            }
             $data['need_update_identity'] = true;
             $data['identity_email'] = $context['subscriber_email'];
             $data['store_id'] = $context['store_id'];

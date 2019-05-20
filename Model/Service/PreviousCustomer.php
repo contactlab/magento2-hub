@@ -181,7 +181,7 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
                 $this->_eventService->collectEvent($this->_strategyLogin);
                 */
                 $data = $previousCustomer->getData();
-                $data['need_update_identity'] = true;
+                $data['scope'] = Event::HUB_EVENT_SCOPE_ADMIN;
                 $this->_strategyRegister->setContext($data);
                 $this->_eventService->collectEvent($this->_strategyRegister);
 
@@ -199,7 +199,7 @@ class PreviousCustomer  implements PreviousCustomerManagementInterface
 
                 $data = $previousCustomer->getData();
                 $data['subscriber_email'] = $data['email'];
-                $data['need_update_identity'] = true;
+                $data['scope'] = Event::HUB_EVENT_SCOPE_ADMIN;
                 $this->_strategySubscriber->setContext($data);
                 $this->_eventService->collectEvent($this->_strategySubscriber);
             }

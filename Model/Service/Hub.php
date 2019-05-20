@@ -319,11 +319,29 @@ class Hub implements HubManagementInterface
         //var_dump(__METHOD__);
         $this->_helper->log(__METHOD__);
         $hubCustomerId = null;
+
         if($event->getNeedUpdateIdentity())
         {
             $hubCustomer = $this->composeHubCustomer($event);
+
+            /**
+             * TODO
+             * devo chiamre il customer per mail e vedere se esiste
+             * se si faccio update altrimenti creo
+             * da verificare l'utilità di getNeedUpdateIdentity su ogni evento
+             */
+
             $response = $this->postCustomer($hubCustomer);
-            //var_dump($response);
+
+            if ((property_exists($response, 'errors')) && ($response->curl_http_code != 409))
+            {
+                foreach ($response->errors as $error)
+                {
+                    $this->_helper->log($error->message);
+                }
+                $errorMessage = 'Invalid Hub Customer Id';
+                throw new \BadMethodCallException($errorMessage);
+            }
 
             if(property_exists($response, "id"))
             {
@@ -346,7 +364,7 @@ class Hub implements HubManagementInterface
                 }
             }
 
-            if($event->getSessionId())
+            if(($hubCustomerId) && ($event->getSessionId()))
             {
                 $session = new \stdClass();
                 $session->value = $event->getSessionId();
